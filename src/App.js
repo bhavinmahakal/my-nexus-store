@@ -329,20 +329,15 @@ const GlobalStyles = () => (
     @media (max-width: 480px) {
       .cart-sidebar { width: 100vw; }
     }
-  @media (max-width: 768px) {
-  .desktop-nav { display: none !important; }
-  .mobile-menu-btn { display: flex !important; }
-}
-   /* NAVBAR MOBILE */
-    @media (max-width: 768px) {
+
+     @media (max-width: 768px) {
       .desktop-nav { display: none !important; }
       .mobile-menu-btn { display: flex !important; }
     }
 
-  `}</style>   {/* ← yeh line rehni chahiye */}
-); `}</style>
-  
+  `}</style>
 );
+  
 
 // ============================================================
 // CONTEXT & STATE
