@@ -329,7 +329,19 @@ const GlobalStyles = () => (
     @media (max-width: 480px) {
       .cart-sidebar { width: 100vw; }
     }
-  `}</style>
+  @media (max-width: 768px) {
+  .desktop-nav { display: none !important; }
+  .mobile-menu-btn { display: flex !important; }
+}
+   /* NAVBAR MOBILE */
+    @media (max-width: 768px) {
+      .desktop-nav { display: none !important; }
+      .mobile-menu-btn { display: flex !important; }
+    }
+
+  `}</style>   {/* ← yeh line rehni chahiye */}
+); `}</style>
+  
 );
 
 // ============================================================
@@ -632,109 +644,152 @@ const CartSidebar = () => {
 
 // --- NAVBAR ---
 const Navbar = ({ page, setPage }) => {
-  const { state, dispatch } = useContext(AppContext);
-  const cartCount = state.cart.reduce((s, i) => s + i.qty, 0);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const fn = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", fn);
-    return () => window.removeEventListener("scroll", fn);
+    const onScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const navLinks = [
-    { label: "Shop", pg: "products" },
-    { label: "Help", pg: "help" },
-    { label: "Reviews", pg: "reviews" },
-    { label: "Contact", pg: "contact" },
+    { pg: "home", label: "Home" },
+    { pg: "products", label: "Shop" },
+    { pg: "reviews", label: "Reviews" },
+    { pg: "about", label: "About" },
+    { pg: "contact", label: "Contact" },
   ];
 
   return (
     <nav style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
-      height: 72,
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000,
       background: scrolled ? "rgba(9,9,9,0.95)" : "transparent",
       backdropFilter: scrolled ? "blur(20px)" : "none",
       borderBottom: scrolled ? "1px solid var(--border)" : "1px solid transparent",
-      transition: "all 0.3s ease",
-      display: "flex", alignItems: "center",
+      transition: "all 0.4s ease",
+      padding: "0 24px",
     }}>
-      <div className="container" style={{ display: "flex", alignItems: "center", gap: 32, width: "100%" }}>
-        {/* Logo */}
-        <button
-          onClick={() => setPage("home")}
-          style={{ background: "none", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, letterSpacing: -0.5, display: "flex", alignItems: "center", gap: 8 }}
-        >
-          <span style={{ color: "var(--accent)" }}>⬡</span>
-          <span style={{ color: "var(--white)" }}>NEXUS</span>
+      <div style={{
+        maxWidth: 1200, margin: "0 auto",
+        display: "flex", alignItems: "center",
+        justifyContent: "space-between",
+        height: scrolled ? 60 : 72,
+        transition: "height 0.4s ease",
+      }}>
+
+        {/* ── LOGO ── */}
+        <button onClick={() => { setPage("home"); setMenuOpen(false); }}
+          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 8,
+            background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "var(--font-display)", fontWeight: 900,
+            fontSize: 16, color: "#fff", letterSpacing: -1,
+          }}>Z</div>
+          <span style={{
+            fontFamily: "var(--font-display)", fontWeight: 800,
+            fontSize: 22, color: "var(--white)", letterSpacing: -1,
+          }}>ZROM</span>
         </button>
 
-        {/* Desktop Nav */}
-        <div style={{ display: "flex", gap: 28, flex: 1 }} className="desktop-nav">
+        {/* ── DESKTOP LINKS ── */}
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}
+          className="desktop-nav">
           {navLinks.map(l => (
-            <button key={l.pg} className={`nav-link ${page === l.pg ? "active" : ""}`} onClick={() => setPage(l.pg)}
-              style={{ background: "none", fontFamily: "var(--font-body)", position: "relative" }}>
-              {l.label}
-              {page === l.pg && <span style={{ position: "absolute", bottom: -4, left: 0, right: 0, height: 2, background: "var(--accent)", borderRadius: 2 }} />}
-            </button>
+            <button key={l.pg}
+              onClick={() => setPage(l.pg)}
+              style={{
+                background: page === l.pg ? "rgba(255,77,28,0.12)" : "none",
+                border: "none", cursor: "pointer",
+                fontFamily: "var(--font-body)", fontWeight: 500,
+                fontSize: 14, color: page === l.pg ? "var(--accent)" : "var(--text-mid)",
+                padding: "8px 16px", borderRadius: 8,
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={e => { if (page !== l.pg) e.target.style.color = "var(--white)"; }}
+              onMouseLeave={e => { if (page !== l.pg) e.target.style.color = "var(--text-mid)"; }}
+            >{l.label}</button>
           ))}
         </div>
 
-        {/* Actions */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-          <button className="btn-ghost" onClick={() => setPage("products")} style={{ padding: 10 }}>
-            <Icon name="search" size={18} />
-          </button>
-          <button className="btn-ghost" onClick={() => setPage("profile")} style={{ padding: 10 }}>
-            <Icon name="user" size={18} />
-          </button>
-          <button
-            className="btn-ghost"
-            onClick={() => dispatch({ type: "TOGGLE_CART" })}
-            style={{ padding: 10, position: "relative" }}
-          >
-            <Icon name="cart" size={18} />
-            {cartCount > 0 && (
-              <span style={{
-                position: "absolute", top: 4, right: 4,
-                width: 18, height: 18,
-                background: "var(--accent)",
-                borderRadius: "50%",
-                fontSize: 10, fontWeight: 700,
-                display: "flex", alignItems: "center", justifyContent: "center",
-                color: "white",
-              }}>{cartCount}</span>
-            )}
-          </button>
-          <button className="btn-ghost" style={{ padding: 8 }} onClick={() => setMobileOpen(!mobileOpen)}>
-            <Icon name="menu" size={20} />
+        {/* ── RIGHT SIDE ── */}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button onClick={() => setPage("products")}
+            style={{
+              background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+              border: "none", cursor: "pointer", color: "#fff",
+              fontFamily: "var(--font-body)", fontWeight: 600,
+              fontSize: 13, padding: "9px 20px", borderRadius: 8,
+              transition: "opacity 0.2s ease",
+            }}
+            onMouseEnter={e => e.target.style.opacity = 0.85}
+            onMouseLeave={e => e.target.style.opacity = 1}
+            className="desktop-nav"
+          >Shop Now</button>
+
+          {/* Hamburger — mobile only */}
+          <button onClick={() => setMenuOpen(!menuOpen)}
+            className="mobile-menu-btn"
+            style={{
+              background: "var(--surface)", border: "1px solid var(--border)",
+              borderRadius: 8, cursor: "pointer",
+              width: 40, height: 40,
+              display: "none", flexDirection: "column",
+              alignItems: "center", justifyContent: "center", gap: 5,
+              padding: 0,
+            }}>
+            {[0,1,2].map(i => (
+              <span key={i} style={{
+                display: "block", width: 18, height: 2,
+                background: "var(--white)", borderRadius: 2,
+                transition: "all 0.3s ease",
+                transform: menuOpen
+                  ? i === 0 ? "rotate(45deg) translate(5px,5px)"
+                  : i === 1 ? "opacity: 0"
+                  : "rotate(-45deg) translate(5px,-5px)"
+                  : "none",
+                opacity: menuOpen && i === 1 ? 0 : 1,
+              }} />
+            ))}
           </button>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div style={{
-          position: "absolute", top: "100%", left: 0, right: 0,
-          background: "var(--void)",
-          borderBottom: "1px solid var(--border)",
-          padding: "16px 24px",
-          display: "flex", flexDirection: "column", gap: 4,
-          animation: "fadeUp 0.2s ease"
-        }}>
+      {/* ── MOBILE MENU ── */}
+      <div style={{
+        maxHeight: menuOpen ? 400 : 0,
+        overflow: "hidden",
+        transition: "max-height 0.4s ease",
+        background: "rgba(9,9,9,0.98)",
+        borderTop: menuOpen ? "1px solid var(--border)" : "none",
+      }}>
+        <div style={{ padding: menuOpen ? "16px 0 24px" : 0 }}>
           {navLinks.map(l => (
-            <button key={l.pg} className="btn-ghost" onClick={() => { setPage(l.pg); setMobileOpen(false); }}
-              style={{ justifyContent: "flex-start", fontSize: 16, padding: "12px 8px" }}>
-              {l.label}
-            </button>
+            <button key={l.pg}
+              onClick={() => { setPage(l.pg); setMenuOpen(false); }}
+              style={{
+                display: "block", width: "100%", textAlign: "left",
+                background: page === l.pg ? "rgba(255,77,28,0.1)" : "none",
+                border: "none", cursor: "pointer",
+                fontFamily: "var(--font-body)", fontWeight: 500,
+                fontSize: 16, color: page === l.pg ? "var(--accent)" : "var(--text)",
+                padding: "14px 24px", transition: "all 0.2s ease",
+              }}
+            >{l.label}</button>
           ))}
-          <div className="divider" />
-          <button className="btn-primary" onClick={() => { setPage("login"); setMobileOpen(false); }} style={{ justifyContent: "center" }}>
-            Sign In
-          </button>
+          <div style={{ padding: "12px 24px 0" }}>
+            <button onClick={() => { setPage("products"); setMenuOpen(false); }}
+              style={{
+                width: "100%", padding: "14px",
+                background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+                border: "none", borderRadius: 8, cursor: "pointer",
+                color: "#fff", fontWeight: 700, fontSize: 15,
+              }}>Shop Now 🔥</button>
+          </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };
@@ -746,7 +801,7 @@ const Footer = ({ setPage }) => (
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
         <div>
           <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, letterSpacing: -0.5, marginBottom: 16 }}>
-            <span style={{ color: "var(--accent)" }}>⬡</span> NEXUS
+            <span style={{ color: "var(--accent)" }}>⬡</span> ZROM
           </div>
           <p style={{ color: "var(--text-mid)", fontSize: 14, lineHeight: 1.8, maxWidth: 280 }}>
             Premium streetwear and accessories built for those who move forward. Every product is a statement.
@@ -772,7 +827,7 @@ const Footer = ({ setPage }) => (
       </div>
       <div className="divider" />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <span style={{ fontSize: 13, color: "var(--text-dim)" }}>© 2025 NEXUS. All rights reserved.</span>
+        <span style={{ fontSize: 13, color: "var(--text-dim)" }}>© 2025 ZROM. All rights reserved.</span>
         <div style={{ display: "flex", gap: 24 }}>
           {["Privacy", "Terms", "Cookies"].map(l => (
             <button key={l} className="btn-ghost" style={{ padding: 0, fontSize: 13, color: "var(--text-dim)" }}>{l}</button>
@@ -810,7 +865,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
         <div className="container" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center", padding: "80px 24px" }}>
           <div style={{ animation: "fadeUp 0.8s ease" }}>
             <div className="badge badge-neon" style={{ marginBottom: 24 }}>
-              <Icon name="bolt" size={11} /> NEW COLLECTION 2025
+              <Icon name="bolt" size={11} /> NEW DROP SS26
             </div>
             <h1 style={{
               fontFamily: "var(--font-display)",
@@ -821,15 +876,15 @@ const HomePage = ({ setPage, onViewProduct }) => {
               marginBottom: 24,
               color: "var(--white)",
             }}>
-              Move<br />
+              Wear<br />
               <span style={{
                 background: "linear-gradient(135deg, var(--accent), var(--accent2))",
                 WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
                 backgroundClip: "text"
-              }}>Different.</span>
+              }}>ZROM.</span>
             </h1>
             <p style={{ fontSize: 18, color: "var(--text-mid)", lineHeight: 1.7, maxWidth: 420, marginBottom: 40 }}>
-              Premium streetwear engineered for those who refuse to blend in. Every piece tells a story.
+              Born on the streets. Built for the bold. ZROM is not just clothing — it's identity.
             </p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               <button className="btn-primary" onClick={() => setPage("products")} style={{ padding: "16px 36px", fontSize: 15 }}>
@@ -840,7 +895,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
               </button>
             </div>
             <div style={{ display: "flex", gap: 32, marginTop: 48 }}>
-              {[["10K+", "Happy Customers"], ["40+", "Countries Shipped"], ["4.9★", "Average Rating"]].map(([val, lab]) => (
+              {[["500+", "Orders Delivered"], ["15+", "Cities Reached"], ["4.9★", "Average Rating"]].map(([val, lab]) => (
                 <div key={lab}>
                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--white)" }}>{val}</div>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{lab}</div>
@@ -1335,7 +1390,7 @@ const ContactPage = () => {
             <div>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20, marginBottom: 24 }}>Reach Out</h3>
               {[
-                { icon: "mail", label: "Email", val: "hello@nexus.store" },
+                { icon: "mail", label: "Email", val: "hello@ZROM.store" },
                 { icon: "phone", label: "Phone", val: "+1 (555) 000-1234" },
                 { icon: "truck", label: "Hours", val: "Mon-Fri, 9AM-6PM EST" },
               ].map(c => (
@@ -1524,7 +1579,7 @@ const LoginPage = ({ setPage }) => {
       <div style={{ width: "100%", maxWidth: 420, padding: "0 24px" }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, marginBottom: 4 }}>
-            <span style={{ color: "var(--accent)" }}>⬡</span> NEXUS
+            <span style={{ color: "var(--accent)" }}>⬡</span> ZROM
           </div>
           <p style={{ color: "var(--text-dim)" }}>Sign in to your account</p>
         </div>
