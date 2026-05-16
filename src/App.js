@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef, createContext, useContext, useReducer } from "react";
+import { useState, useEffect, createContext, useContext, useReducer } from "react";
 
 // ============================================================
 // GLOBAL STYLES
 // ============================================================
+// eslint-disable-next-line no-unused-vars
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap');
@@ -1087,7 +1088,6 @@ const Footer = ({ setPage }) => (
 
 // --- HOME PAGE ---
 const HomePage = ({ setPage, onViewProduct }) => {
-  const { dispatch } = useContext(AppContext);
   const [email, setEmail] = useState("");
   const [subDone, setSubDone] = useState(false);
 
@@ -1303,7 +1303,7 @@ const ProductsPage = ({ onViewProduct }) => {
   const [view, setView] = useState("grid");
   const [search, setSearch] = useState("");
   const [priceRange, setPriceRange] = useState(500);
-  const { addToCart } = useContext(CartContext);
+  const { addToCart } = useContext(AppContext);
 
   let filtered = PRODUCTS.filter(p =>
     (cat === "All" || p.category === cat) &&
@@ -1359,7 +1359,7 @@ const ProductsPage = ({ onViewProduct }) => {
                 <button key={c}
                   onClick={() => setCat(c)}
                   style={{
-                    padding: "8px 18px", borderRadius: 20, border: "none", cursor: "pointer",
+                    padding: "8px 18px", borderRadius: 20, cursor: "pointer",
                     fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13,
                     background: cat === c ? "var(--accent)" : "var(--card)",
                     color: cat === c ? "#fff" : "var(--text-mid)",
