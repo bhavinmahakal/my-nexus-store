@@ -562,74 +562,208 @@ const ProductCard = ({ product, onView }) => {
 // --- CART SIDEBAR ---
 const CartSidebar = () => {
   const { state, dispatch } = useContext(AppContext);
-  const total = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const [coupon, setCoupon] = useState("");
+  const [discount, setDiscount] = useState(0);
+  const [couponMsg, setCouponMsg] = useState("");
+
+  const subtotal = state.cart.reduce((s, i) => s + i.price * i.qty, 0);
+  const shipping = subtotal >= 50 ? 0 : 9.99;
+  const discountAmt = (subtotal * discount) / 100;
+  const total = subtotal - discountAmt + shipping;
+  const totalItems = state.cart.reduce((s, i) => s + i.qty, 0);
+  const freeShippingLeft = Math.max(0, 50 - subtotal);
+
+  const COUPONS = { "ZROM10": 10, "STREET20": 20, "NEWDROP": 15 };
+
+  const applyCoupon = () => {
+    if (COUPONS[coupon.toUpperCase()]) {
+      setDiscount(COUPONS[coupon.toUpperCase()]);
+      setCouponMsg(`✅ ${COUPONS[coupon.toUpperCase()]}% off applied!`);
+    } else {
+      setCouponMsg("❌ Invalid coupon code");
+      setDiscount(0);
+    }
+  };
 
   return (
     <>
+      {/* Backdrop */}
       {state.isCartOpen && (
         <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)", zIndex: 499 }}
+          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.6)", backdropFilter: "blur(6px)", zIndex: 499 }}
           onClick={() => dispatch({ type: "CLOSE_CART" })}
         />
       )}
+
       <div className={`cart-sidebar ${state.isCartOpen ? "open" : ""}`}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "24px 24px 20px", borderBottom: "1px solid var(--border)" }}>
-          <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20 }}>
-            Your Cart <span style={{ color: "var(--accent)" }}>({state.cart.reduce((s, i) => s + i.qty, 0)})</span>
+
+        {/* ── HEADER ── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "22px 24px", borderBottom: "1px solid var(--border)" }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--white)" }}>
+              Your Cart
+              <span style={{ marginLeft: 8, background: "var(--accent)", color: "#fff", borderRadius: 20, padding: "2px 10px", fontSize: 13 }}>
+                {totalItems}
+              </span>
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>ZROM SS26 Collection</div>
           </div>
-          <button className="btn-ghost" onClick={() => dispatch({ type: "CLOSE_CART" })} style={{ padding: 8 }}>
-            <Icon name="x" size={20} />
+          <button onClick={() => dispatch({ type: "CLOSE_CART" })}
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text)" }}>
+            <Icon name="x" size={18} />
           </button>
         </div>
 
-        <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px" }}>
+        {/* ── FREE SHIPPING PROGRESS ── */}
+        {state.cart.length > 0 && (
+          <div style={{ padding: "14px 24px", background: "rgba(0,255,136,0.05)", borderBottom: "1px solid var(--border)" }}>
+            {freeShippingLeft > 0 ? (
+              <>
+                <div style={{ fontSize: 12, color: "var(--text-mid)", marginBottom: 8 }}>
+                  Add <span style={{ color: "var(--neon)", fontWeight: 700 }}>${freeShippingLeft.toFixed(2)}</span> more for free shipping! 🚚
+                </div>
+                <div style={{ height: 4, background: "var(--border)", borderRadius: 4, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: `${Math.min((subtotal / 50) * 100, 100)}%`, background: "var(--neon)", borderRadius: 4, transition: "width 0.4s ease" }} />
+                </div>
+              </>
+            ) : (
+              <div style={{ fontSize: 12, color: "var(--neon)", fontWeight: 600 }}>🎉 You've unlocked FREE shipping!</div>
+            )}
+          </div>
+        )}
+
+        {/* ── CART ITEMS ── */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "12px 24px" }}>
           {state.cart.length === 0 ? (
             <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-dim)" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>🛒</div>
-              <div style={{ fontFamily: "var(--font-display)", fontSize: 18, marginBottom: 8, color: "var(--text-mid)" }}>Cart is empty</div>
-              <div style={{ fontSize: 14 }}>Add something amazing!</div>
+              <div style={{ fontSize: 56, marginBottom: 16 }}>🛒</div>
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, color: "var(--text-mid)", marginBottom: 8 }}>Cart is empty</div>
+              <div style={{ fontSize: 14, marginBottom: 24 }}>Add something amazing!</div>
+              <button onClick={() => dispatch({ type: "CLOSE_CART" })}
+                style={{ padding: "10px 24px", background: "var(--accent)", border: "none", borderRadius: 8, color: "#fff", fontWeight: 700, cursor: "pointer", fontSize: 14 }}>
+                Shop Now 🔥
+              </button>
             </div>
-          ) : state.cart.map(item => (
-            <div key={`${item.id}-${item.variant}`} style={{ display: "flex", gap: 14, padding: "16px 0", borderBottom: "1px solid var(--border)" }}>
-              <img src={item.image} alt={item.name} style={{ width: 72, height: 72, objectFit: "cover", borderRadius: "var(--r-sm)" }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 2 }}>{item.name}</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>{item.variant}</div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, background: "var(--surface)", borderRadius: "var(--r-sm)", padding: "4px 8px" }}>
-                    <button style={{ background: "none", color: "var(--text)", display: "flex" }} onClick={() => dispatch({ type: "UPDATE_QTY", id: item.id, variant: item.variant, qty: item.qty - 1 })}>
-                      <Icon name="minus" size={14} />
-                    </button>
-                    <span style={{ fontSize: 14, fontWeight: 600, minWidth: 20, textAlign: "center" }}>{item.qty}</span>
-                    <button style={{ background: "none", color: "var(--text)", display: "flex" }} onClick={() => dispatch({ type: "UPDATE_QTY", id: item.id, variant: item.variant, qty: item.qty + 1 })}>
-                      <Icon name="plus" size={14} />
-                    </button>
+          ) : (
+            state.cart.map(item => (
+              <div key={`${item.id}-${item.variant}`}
+                style={{ display: "flex", gap: 14, padding: "16px 0", borderBottom: "1px solid var(--border)" }}>
+                {/* Image */}
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <img src={item.image} alt={item.name}
+                    style={{ width: 76, height: 76, objectFit: "cover", borderRadius: "var(--r-sm)" }} />
+                  {item.badge && (
+                    <span style={{ position: "absolute", top: -4, left: -4, background: "var(--accent)", color: "#fff", fontSize: 9, fontWeight: 800, padding: "2px 6px", borderRadius: 4 }}>
+                      {item.badge}
+                    </span>
+                  )}
+                </div>
+
+                {/* Details */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2, color: "var(--white)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    {item.name}
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <span style={{ fontWeight: 700 }}>${(item.price * item.qty).toFixed(2)}</span>
-                    <button style={{ background: "none", color: "var(--text-dim)", display: "flex" }} onClick={() => dispatch({ type: "REMOVE_FROM_CART", id: item.id, variant: item.variant })}>
-                      <Icon name="x" size={14} />
-                    </button>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 10 }}>
+                    {item.variant} · {item.category}
+                  </div>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    {/* Qty controls */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 0, background: "var(--surface)", borderRadius: 8, border: "1px solid var(--border)", overflow: "hidden" }}>
+                      <button
+                        onClick={() => dispatch({ type: "UPDATE_QTY", id: item.id, variant: item.variant, qty: item.qty - 1 })}
+                        style={{ background: "none", border: "none", color: "var(--text)", cursor: "pointer", padding: "6px 10px", display: "flex", alignItems: "center" }}>
+                        <Icon name="minus" size={12} />
+                      </button>
+                      <span style={{ fontSize: 14, fontWeight: 700, minWidth: 24, textAlign: "center", color: "var(--white)" }}>{item.qty}</span>
+                      <button
+                        onClick={() => dispatch({ type: "UPDATE_QTY", id: item.id, variant: item.variant, qty: item.qty + 1 })}
+                        style={{ background: "none", border: "none", color: "var(--text)", cursor: "pointer", padding: "6px 10px", display: "flex", alignItems: "center" }}>
+                        <Icon name="plus" size={12} />
+                      </button>
+                    </div>
+
+                    {/* Price + Remove */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 16, color: "var(--white)" }}>
+                        ${(item.price * item.qty).toFixed(2)}
+                      </span>
+                      <button
+                        onClick={() => dispatch({ type: "REMOVE_FROM_CART", id: item.id, variant: item.variant })}
+                        style={{ background: "none", border: "none", color: "var(--text-dim)", cursor: "pointer", display: "flex", padding: 4 }}
+                        onMouseEnter={e => e.currentTarget.style.color = "var(--accent)"}
+                        onMouseLeave={e => e.currentTarget.style.color = "var(--text-dim)"}
+                      >
+                        <Icon name="x" size={14} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
+        {/* ── BOTTOM SECTION ── */}
         {state.cart.length > 0 && (
-          <div style={{ padding: "20px 24px", borderTop: "1px solid var(--border)" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
-              <span style={{ color: "var(--text-mid)" }}>Subtotal</span>
-              <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20 }}>${total.toFixed(2)}</span>
+          <div style={{ padding: "20px 24px", borderTop: "1px solid var(--border)", background: "var(--void)" }}>
+
+            {/* Coupon */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              <input
+                value={coupon}
+                onChange={e => { setCoupon(e.target.value); setCouponMsg(""); }}
+                placeholder="Coupon code"
+                style={{ flex: 1, padding: "9px 12px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--white)", fontSize: 13, fontFamily: "var(--font-body)", outline: "none" }}
+              />
+              <button onClick={applyCoupon}
+                style={{ padding: "9px 16px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text)", fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                Apply
+              </button>
             </div>
-            <button className="btn-primary" style={{ width: "100%", justifyContent: "center", padding: "14px" }}
-              onClick={() => { dispatch({ type: "CLOSE_CART" }); }}>
+            {couponMsg && <div style={{ fontSize: 12, marginBottom: 12, color: discount > 0 ? "var(--neon)" : "#ff6b6b" }}>{couponMsg}</div>}
+
+            {/* Price breakdown */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--text-mid)" }}>
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              {discount > 0 && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--neon)" }}>
+                  <span>Discount ({discount}%)</span>
+                  <span>-${discountAmt.toFixed(2)}</span>
+                </div>
+              )}
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--text-mid)" }}>
+                <span>Shipping</span>
+                <span style={{ color: shipping === 0 ? "var(--neon)" : "var(--text-mid)" }}>
+                  {shipping === 0 ? "FREE 🎉" : `$${shipping.toFixed(2)}`}
+                </span>
+              </div>
+              <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16 }}>Total</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>${total.toFixed(2)}</span>
+              </div>
+            </div>
+
+            {/* Checkout button */}
+            <button
+              className="btn-primary"
+              style={{ width: "100%", justifyContent: "center", padding: "15px", fontSize: 15, fontWeight: 800 }}
+              onClick={() => dispatch({ type: "CLOSE_CART" })}>
               Checkout <Icon name="arrowRight" size={16} />
             </button>
-            <p style={{ textAlign: "center", fontSize: 12, color: "var(--text-dim)", marginTop: 12 }}>
-              🔒 Secured by SSL · Free shipping over $50
-            </p>
+
+            <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 14 }}>
+              {["💳", "🔒", "📦"].map((icon, i) => (
+                <span key={i} style={{ fontSize: 11, color: "var(--text-dim)", display: "flex", alignItems: "center", gap: 4 }}>
+                  {icon} {["Secure Pay", "SSL Encrypted", "Fast Delivery"][i]}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -791,44 +925,158 @@ const Navbar = ({ page, setPage }) => {
 
 // --- FOOTER ---
 const Footer = ({ setPage }) => (
-  <footer style={{ background: "var(--void)", borderTop: "1px solid var(--border)", padding: "60px 0 32px" }}>
+  <footer style={{ background: "var(--void)", borderTop: "1px solid var(--border)", padding: "80px 0 32px" }}>
     <div className="container">
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 48 }}>
+
+      {/* ── TOP CTA BANNER ── */}
+      <div style={{
+        background: "linear-gradient(135deg, rgba(255,77,28,0.12), rgba(255,140,66,0.08))",
+        border: "1px solid rgba(255,77,28,0.25)",
+        borderRadius: "var(--r-xl)", padding: "40px 48px",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        flexWrap: "wrap", gap: 24, marginBottom: 64,
+      }}>
         <div>
-          <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, letterSpacing: -0.5, marginBottom: 16 }}>
-            <span style={{ color: "var(--accent)" }}>⬡</span> ZROM
+          <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(20px, 3vw, 28px)", color: "var(--white)", letterSpacing: -1, marginBottom: 8 }}>
+            Join the ZROM Movement 🔥
           </div>
-          <p style={{ color: "var(--text-mid)", fontSize: 14, lineHeight: 1.8, maxWidth: 280 }}>
-            Premium streetwear and accessories built for those who move forward. Every product is a statement.
+          <p style={{ color: "var(--text-mid)", fontSize: 14 }}>
+            Get early access to drops, exclusive deals & member-only offers.
           </p>
         </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <input
+            type="email"
+            placeholder="your@email.com"
+            style={{
+              padding: "12px 18px", borderRadius: 10,
+              background: "var(--card)", border: "1px solid var(--border)",
+              color: "var(--white)", fontSize: 14, outline: "none",
+              fontFamily: "var(--font-body)", minWidth: 220,
+            }}
+          />
+          <button style={{
+            padding: "12px 24px", borderRadius: 10,
+            background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+            border: "none", color: "#fff", fontWeight: 700,
+            fontSize: 14, cursor: "pointer", fontFamily: "var(--font-body)",
+          }}>Subscribe</button>
+        </div>
+      </div>
+
+      {/* ── MAIN GRID ── */}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 56 }}>
+
+        {/* Brand column */}
+        <div>
+          <button onClick={() => setPage("home")}
+            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: 0 }}>
+            <div style={{
+              width: 38, height: 38, borderRadius: 8,
+              background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 16, color: "#fff",
+            }}>Z</div>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)", letterSpacing: -1 }}>ZROM</span>
+          </button>
+
+          <p style={{ color: "var(--text-mid)", fontSize: 14, lineHeight: 1.8, maxWidth: 260, marginBottom: 24 }}>
+            Premium streetwear built for those who move forward. Every piece is a statement.
+          </p>
+
+          {/* Social icons */}
+          <div style={{ display: "flex", gap: 10 }}>
+            {[
+              { label: "IG", name: "Instagram" },
+              { label: "TW", name: "Twitter/X" },
+              { label: "TK", name: "TikTok" },
+              { label: "YT", name: "YouTube" },
+            ].map(s => (
+              <div key={s.label} title={s.name} style={{
+                width: 36, height: 36, borderRadius: 8,
+                background: "var(--card)", border: "1px solid var(--border)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                cursor: "pointer", fontSize: 11, fontWeight: 800,
+                color: "var(--text-mid)", transition: "all 0.2s ease",
+                fontFamily: "var(--font-display)",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--accent)"; e.currentTarget.style.color = "var(--accent)"; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-mid)"; }}
+              >{s.label}</div>
+            ))}
+          </div>
+        </div>
+
+        {/* Nav columns */}
         {[
           { title: "Shop", links: [["All Products", "products"], ["New Arrivals", "products"], ["Bestsellers", "products"], ["Sale", "products"]] },
           { title: "Support", links: [["Help Center", "help"], ["Returns", "refunds"], ["Contact Us", "contact"], ["Track Order", "profile"]] },
           { title: "Company", links: [["Privacy Policy", "privacy"], ["Terms of Service", "terms"], ["Reviews", "reviews"], ["Login", "login"]] },
         ].map(col => (
           <div key={col.title}>
-            <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 13, letterSpacing: 1, textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 16 }}>{col.title}</div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{
+              fontFamily: "var(--font-display)", fontWeight: 700,
+              fontSize: 12, letterSpacing: 2, textTransform: "uppercase",
+              color: "var(--text-dim)", marginBottom: 20,
+            }}>{col.title}</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {col.links.map(([label, pg]) => (
-                <button key={label} className="btn-ghost" onClick={() => setPage(pg)}
-                  style={{ padding: 0, fontSize: 14, color: "var(--text-mid)", justifyContent: "flex-start" }}>
-                  {label}
-                </button>
+                <button key={label} onClick={() => setPage(pg)}
+                  style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    fontSize: 14, color: "var(--text-mid)", textAlign: "left",
+                    padding: 0, fontFamily: "var(--font-body)",
+                    transition: "color 0.2s ease",
+                  }}
+                  onMouseEnter={e => e.target.style.color = "var(--white)"}
+                  onMouseLeave={e => e.target.style.color = "var(--text-mid)"}
+                >{label}</button>
               ))}
             </div>
           </div>
         ))}
       </div>
-      <div className="divider" />
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 16 }}>
-        <span style={{ fontSize: 13, color: "var(--text-dim)" }}>© 2025 ZROM. All rights reserved.</span>
-        <div style={{ display: "flex", gap: 24 }}>
+
+      {/* ── TRUST BADGES ── */}
+      <div style={{
+        display: "flex", gap: 24, flexWrap: "wrap", justifyContent: "center",
+        padding: "24px 0", borderTop: "1px solid var(--border)",
+        borderBottom: "1px solid var(--border)", marginBottom: 32,
+      }}>
+        {[
+          ["🚚", "Free Shipping over $50"],
+          ["🔒", "Secure Checkout"],
+          ["↩️", "30-Day Returns"],
+          ["✅", "100% Authentic"],
+          ["🌍", "Ships to 40+ Countries"],
+        ].map(([icon, text]) => (
+          <div key={text} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-dim)" }}>
+            <span>{icon}</span>
+            <span>{text}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* ── BOTTOM BAR ── */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+        <span style={{ fontSize: 13, color: "var(--text-dim)" }}>
+          © 2026 ZROM. All rights reserved. Made with 🔥
+        </span>
+        <div style={{ display: "flex", gap: 20 }}>
           {["Privacy", "Terms", "Cookies"].map(l => (
-            <button key={l} className="btn-ghost" style={{ padding: 0, fontSize: 13, color: "var(--text-dim)" }}>{l}</button>
+            <button key={l}
+              style={{
+                background: "none", border: "none", cursor: "pointer",
+                fontSize: 13, color: "var(--text-dim)", fontFamily: "var(--font-body)",
+                transition: "color 0.2s ease", padding: 0,
+              }}
+              onMouseEnter={e => e.target.style.color = "var(--white)"}
+              onMouseLeave={e => e.target.style.color = "var(--text-dim)"}
+            >{l}</button>
           ))}
         </div>
       </div>
+
     </div>
   </footer>
 );
@@ -1054,69 +1302,208 @@ const ProductsPage = ({ onViewProduct }) => {
   const [sort, setSort] = useState("featured");
   const [view, setView] = useState("grid");
   const [search, setSearch] = useState("");
+  const [priceRange, setPriceRange] = useState(500);
+  const { addToCart } = useContext(CartContext);
 
   let filtered = PRODUCTS.filter(p =>
     (cat === "All" || p.category === cat) &&
-    (search === "" || p.name.toLowerCase().includes(search.toLowerCase()))
+    (search === "" || p.name.toLowerCase().includes(search.toLowerCase())) &&
+    p.price <= priceRange
   );
 
   if (sort === "price-low") filtered = [...filtered].sort((a, b) => a.price - b.price);
   else if (sort === "price-high") filtered = [...filtered].sort((a, b) => b.price - a.price);
   else if (sort === "rating") filtered = [...filtered].sort((a, b) => b.rating - a.rating);
+  else if (sort === "discount") filtered = [...filtered].sort((a, b) =>
+    ((b.originalPrice - b.price) / b.originalPrice) - ((a.originalPrice - a.price) / a.originalPrice)
+  );
+
+  const totalProducts = PRODUCTS.length;
+  const inStockCount = filtered.length;
 
   return (
     <div className="page">
       <section className="section">
         <div className="container">
-          <div style={{ marginBottom: 40 }}>
-            <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "var(--accent)", marginBottom: 8 }}>Catalog</div>
-            <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 40, letterSpacing: -1 }}>All Products</h1>
+
+          {/* ── HEADER ── */}
+          <div style={{ marginBottom: 40, display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+            <div>
+              <div style={{ fontSize: 11, letterSpacing: 3, textTransform: "uppercase", color: "var(--accent)", marginBottom: 8 }}>
+                SS26 Collection
+              </div>
+              <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(28px, 5vw, 48px)", letterSpacing: -2, color: "var(--white)" }}>
+                All Products
+              </h1>
+              <p style={{ color: "var(--text-dim)", fontSize: 14, marginTop: 8 }}>
+                {totalProducts} pieces. Zero compromise.
+              </p>
+            </div>
+            {/* Live badge */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(0,255,136,0.08)", border: "1px solid rgba(0,255,136,0.2)", borderRadius: 20, padding: "8px 16px" }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--neon)", display: "inline-block", boxShadow: "0 0 8px var(--neon)" }} />
+              <span style={{ fontSize: 12, color: "var(--neon)", fontWeight: 600 }}>In Stock — Ships Today</span>
+            </div>
           </div>
 
-          {/* Filters */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 16, marginBottom: 32 }}>
+          {/* ── FILTER BAR ── */}
+          <div style={{
+            background: "var(--surface)", border: "1px solid var(--border)",
+            borderRadius: "var(--r-lg)", padding: "20px 24px",
+            marginBottom: 32, display: "flex",
+            flexDirection: "column", gap: 16
+          }}>
+            {/* Category tabs */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {CATEGORIES.map(c => (
-                <button key={c} className={`tag ${cat === c ? "active" : ""}`} onClick={() => setCat(c)}>{c}</button>
+                <button key={c}
+                  onClick={() => setCat(c)}
+                  style={{
+                    padding: "8px 18px", borderRadius: 20, border: "none", cursor: "pointer",
+                    fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13,
+                    background: cat === c ? "var(--accent)" : "var(--card)",
+                    color: cat === c ? "#fff" : "var(--text-mid)",
+                    border: cat === c ? "none" : "1px solid var(--border)",
+                    transition: "all 0.2s ease",
+                  }}
+                >{c}</button>
               ))}
             </div>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <input className="input" style={{ width: 200, padding: "9px 14px" }} placeholder="Search..." value={search} onChange={e => setSearch(e.target.value)} />
-              <select className="input" style={{ width: 150, padding: "9px 14px" }} value={sort} onChange={e => setSort(e.target.value)}>
-                <option value="featured">Featured</option>
-                <option value="price-low">Price: Low</option>
-                <option value="price-high">Price: High</option>
-                <option value="rating">Top Rated</option>
+
+            {/* Search + Sort + View + Price */}
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+              {/* Search */}
+              <div style={{ position: "relative", flex: 1, minWidth: 180 }}>
+                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-dim)", fontSize: 14 }}>🔍</span>
+                <input
+                  className="input"
+                  style={{ width: "100%", padding: "10px 14px 10px 34px", background: "var(--card)" }}
+                  placeholder="Search products..."
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                />
+              </div>
+
+              {/* Sort */}
+              <select
+                className="input"
+                style={{ padding: "10px 14px", background: "var(--card)", minWidth: 160 }}
+                value={sort}
+                onChange={e => setSort(e.target.value)}
+              >
+                <option value="featured">⭐ Featured</option>
+                <option value="price-low">💰 Price: Low to High</option>
+                <option value="price-high">💎 Price: High to Low</option>
+                <option value="rating">🏆 Top Rated</option>
+                <option value="discount">🔥 Best Discount</option>
               </select>
-              <button className={`btn-ghost ${view === "grid" ? "active" : ""}`} onClick={() => setView("grid")} style={{ padding: 10 }}><Icon name="grid" /></button>
-              <button className={`btn-ghost ${view === "list" ? "active" : ""}`} onClick={() => setView("list")} style={{ padding: 10 }}><Icon name="list" /></button>
+
+              {/* Price range */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--text-mid)", fontSize: 13 }}>
+                <span>Max:</span>
+                <input type="range" min={50} max={500} value={priceRange}
+                  onChange={e => setPriceRange(Number(e.target.value))}
+                  style={{ width: 100, accentColor: "var(--accent)" }}
+                />
+                <span style={{ color: "var(--white)", fontWeight: 700, minWidth: 40 }}>${priceRange}</span>
+              </div>
+
+              {/* View toggle */}
+              <div style={{ display: "flex", gap: 4, background: "var(--card)", borderRadius: 8, padding: 4, border: "1px solid var(--border)" }}>
+                {["grid", "list"].map(v => (
+                  <button key={v}
+                    onClick={() => setView(v)}
+                    style={{
+                      padding: "6px 12px", borderRadius: 6, border: "none", cursor: "pointer",
+                      background: view === v ? "var(--accent)" : "transparent",
+                      color: view === v ? "#fff" : "var(--text-dim)",
+                      fontSize: 13, fontWeight: 600, transition: "all 0.2s ease",
+                    }}
+                  >{v === "grid" ? "⊞ Grid" : "☰ List"}</button>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div style={{ marginBottom: 16, color: "var(--text-dim)", fontSize: 14 }}>{filtered.length} products</div>
+          {/* ── RESULTS COUNT ── */}
+          <div style={{ marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ color: "var(--text-dim)", fontSize: 14 }}>
+              Showing <span style={{ color: "var(--white)", fontWeight: 700 }}>{inStockCount}</span> of {totalProducts} products
+            </span>
+            {cat !== "All" && (
+              <button onClick={() => { setCat("All"); setSearch(""); setPriceRange(500); }}
+                style={{ fontSize: 12, color: "var(--accent)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}>
+                Clear filters
+              </button>
+            )}
+          </div>
 
+          {/* ── PRODUCTS ── */}
           {filtered.length === 0 ? (
             <div style={{ textAlign: "center", padding: "80px 0", color: "var(--text-dim)" }}>
-              <div style={{ fontSize: 48 }}>🔍</div>
-              <div style={{ marginTop: 16, fontSize: 18, fontFamily: "var(--font-display)", color: "var(--text-mid)" }}>No products found</div>
+              <div style={{ fontSize: 56 }}>🔍</div>
+              <div style={{ marginTop: 16, fontSize: 20, fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--text-mid)" }}>No products found</div>
+              <button onClick={() => { setCat("All"); setSearch(""); setPriceRange(500); }}
+                style={{ marginTop: 20, padding: "10px 24px", background: "var(--accent)", border: "none", borderRadius: 8, color: "#fff", cursor: "pointer", fontWeight: 600 }}>
+                Reset Filters
+              </button>
+            </div>
+          ) : view === "grid" ? (
+            <div className="grid-4">
+              {filtered.map(p => (
+                <ProductCard key={p.id} product={p} onView={onViewProduct} />
+              ))}
             </div>
           ) : (
-            <div className={view === "grid" ? "grid-4" : ""} style={view === "list" ? { display: "flex", flexDirection: "column", gap: 16 } : {}}>
-              {filtered.map(p => view === "grid" ? (
-                <ProductCard key={p.id} product={p} onView={onViewProduct} />
-              ) : (
-                <div key={p.id} className="card" style={{ display: "flex", gap: 20, padding: 20, cursor: "pointer" }} onClick={() => onViewProduct(p)}>
-                  <img src={p.image} alt={p.name} style={{ width: 120, height: 120, objectFit: "cover", borderRadius: "var(--r-sm)" }} />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>{p.category}</div>
-                    <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>{p.name}</div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
-                      <StarRating rating={p.rating} />
-                      <span style={{ fontSize: 12, color: "var(--text-dim)" }}>({p.reviews})</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {filtered.map(p => (
+                <div key={p.id}
+                  onClick={() => onViewProduct(p)}
+                  style={{
+                    display: "flex", gap: 20, padding: 20, cursor: "pointer",
+                    background: "var(--surface)", border: "1px solid var(--border)",
+                    borderRadius: "var(--r-md)", transition: "border-color 0.2s ease",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <img src={p.image} alt={p.name}
+                    style={{ width: 110, height: 110, objectFit: "cover", borderRadius: "var(--r-sm)", flexShrink: 0 }} />
+                  <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                        <span style={{ fontSize: 11, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: 1 }}>{p.category}</span>
+                        {p.badge && (
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 4, background: "rgba(255,77,28,0.15)", color: "var(--accent)", border: "1px solid rgba(255,77,28,0.3)" }}>
+                            {p.badge}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 18, marginBottom: 6 }}>{p.name}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <StarRating rating={p.rating} />
+                        <span style={{ fontSize: 12, color: "var(--text-dim)" }}>({p.reviews} reviews)</span>
+                      </div>
                     </div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                      <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22 }}>${p.price}</span>
-                      {p.originalPrice && <span style={{ fontSize: 14, color: "var(--text-dim)", textDecoration: "line-through" }}>${p.originalPrice}</span>}
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                        <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>${p.price}</span>
+                        {p.originalPrice && (
+                          <>
+                            <span style={{ fontSize: 14, color: "var(--text-dim)", textDecoration: "line-through" }}>${p.originalPrice}</span>
+                            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--neon)" }}>
+                              -{Math.round((1 - p.price / p.originalPrice) * 100)}% OFF
+                            </span>
+                          </>
+                        )}
+                      </div>
+                      <button
+                        onClick={e => { e.stopPropagation(); addToCart(p); }}
+                        style={{
+                          padding: "8px 20px", background: "var(--accent)", border: "none",
+                          borderRadius: 8, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer",
+                        }}
+                      >Add to Cart</button>
                     </div>
                   </div>
                 </div>
@@ -1128,7 +1515,6 @@ const ProductsPage = ({ onViewProduct }) => {
     </div>
   );
 };
-
 // --- PRODUCT DETAIL PAGE ---
 const ProductDetailPage = ({ product, onBack }) => {
   const { state, dispatch } = useContext(AppContext);
@@ -1548,12 +1934,24 @@ const LoginPage = ({ setPage }) => {
   const [tab, setTab] = useState("login");
   const [form, setForm] = useState({ email: "", password: "", name: "" });
   const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const e = {};
+    if (!form.email.includes("@")) e.email = "Valid email required";
+    if (form.password.length < 6) e.password = "Min 6 characters";
+    if (tab === "signup" && !form.name.trim()) e.name = "Name required";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
 
   const handleAuth = () => {
+    if (!validate()) return;
     setLoading(true);
     setTimeout(() => {
       dispatch({ type: "SET_USER", user: { name: form.name || "Customer", email: form.email } });
-      dispatch({ type: "SET_TOAST", toast: { title: "Welcome!", msg: `Signed in as ${form.email}` } });
+      dispatch({ type: "SET_TOAST", toast: { title: "Welcome back! 🔥", msg: `Signed in as ${form.email}` } });
       setLoading(false);
       setPage("profile");
     }, 1200);
@@ -1563,69 +1961,158 @@ const LoginPage = ({ setPage }) => {
     setLoading(true);
     setTimeout(() => {
       dispatch({ type: "SET_USER", user: { name: "Google User", email: "user@gmail.com" } });
-      dispatch({ type: "SET_TOAST", toast: { title: "Welcome!", msg: "Signed in with Google" } });
+      dispatch({ type: "SET_TOAST", toast: { title: "Welcome! 🔥", msg: "Signed in with Google" } });
       setLoading(false);
       setPage("profile");
     }, 1000);
   };
 
   return (
-    <div className="page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
-      <div style={{ width: "100%", maxWidth: 420, padding: "0 24px" }}>
+    <div className="page" style={{
+      display: "flex", alignItems: "center", justifyContent: "center",
+      minHeight: "100vh", position: "relative", overflow: "hidden",
+    }}>
+      {/* BG glow */}
+      <div style={{ position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)", width: 500, height: 500, background: "radial-gradient(circle, rgba(255,77,28,0.08) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+
+      <div style={{ width: "100%", maxWidth: 440, padding: "0 24px", position: "relative", zIndex: 1 }}>
+
+        {/* ── LOGO ── */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, marginBottom: 4 }}>
-            <span style={{ color: "var(--accent)" }}>⬡</span> ZROM
-          </div>
-          <p style={{ color: "var(--text-dim)" }}>Sign in to your account</p>
+          <button onClick={() => setPage("home")}
+            style={{ background: "none", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+            <div style={{
+              width: 44, height: 44, borderRadius: 10,
+              background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 20, color: "#fff",
+            }}>Z</div>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 26, color: "var(--white)", letterSpacing: -1 }}>ZROM</span>
+          </button>
+          <p style={{ color: "var(--text-dim)", fontSize: 14 }}>
+            {tab === "login" ? "Welcome back! Sign in to continue." : "Join ZROM. Be different."}
+          </p>
         </div>
 
-        <div className="card" style={{ padding: "36px" }}>
-          {/* Tabs */}
-          <div style={{ display: "flex", background: "var(--surface)", borderRadius: "var(--r-sm)", padding: 4, marginBottom: 28 }}>
+        <div style={{
+          background: "var(--card)", border: "1px solid var(--border)",
+          borderRadius: "var(--r-xl)", padding: "36px 32px",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
+        }}>
+
+          {/* ── TABS ── */}
+          <div style={{ display: "flex", background: "var(--surface)", borderRadius: 10, padding: 4, marginBottom: 28 }}>
             {["login", "signup"].map(t => (
-              <button key={t} onClick={() => setTab(t)} style={{
-                flex: 1, padding: "10px", borderRadius: "var(--r-sm)",
-                background: tab === t ? "var(--accent)" : "transparent",
-                color: tab === t ? "white" : "var(--text-dim)",
-                fontWeight: 600, fontSize: 14, transition: "all 0.2s"
-              }}>
+              <button key={t} onClick={() => { setTab(t); setErrors({}); }}
+                style={{
+                  flex: 1, padding: "11px", borderRadius: 8, border: "none", cursor: "pointer",
+                  background: tab === t ? "var(--accent)" : "transparent",
+                  color: tab === t ? "#fff" : "var(--text-dim)",
+                  fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14,
+                  transition: "all 0.25s ease",
+                }}>
                 {t === "login" ? "Sign In" : "Sign Up"}
               </button>
             ))}
           </div>
 
-          {/* Google */}
-          <button className="btn-outline" onClick={handleGoogle} style={{ width: "100%", justifyContent: "center", marginBottom: 20, padding: "13px" }}>
-            <Icon name="google" size={18} /> Continue with Google
+          {/* ── GOOGLE ── */}
+          <button onClick={handleGoogle}
+            style={{
+              width: "100%", padding: "13px", borderRadius: 10,
+              background: "var(--surface)", border: "1px solid var(--border)",
+              color: "var(--text)", fontFamily: "var(--font-body)", fontWeight: 600,
+              fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center",
+              justifyContent: "center", gap: 10, marginBottom: 20,
+              transition: "border-color 0.2s ease",
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border)"}
+          >
+            <span style={{ fontSize: 18 }}>G</span> Continue with Google
           </button>
 
+          {/* Divider */}
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-            <div className="divider" style={{ flex: 1, margin: 0 }} />
-            <span style={{ fontSize: 12, color: "var(--text-dim)" }}>or</span>
-            <div className="divider" style={{ flex: 1, margin: 0 }} />
+            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+            <span style={{ fontSize: 12, color: "var(--text-dim)" }}>or continue with email</span>
+            <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
           </div>
 
+          {/* ── FORM ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+
             {tab === "signup" && (
-              <input className="input" placeholder="Full Name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
+              <div>
+                <input className="input" placeholder="Full Name"
+                  value={form.name}
+                  onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: "" }); }}
+                  style={{ width: "100%", borderColor: errors.name ? "#ff6b6b" : undefined }}
+                />
+                {errors.name && <div style={{ fontSize: 11, color: "#ff6b6b", marginTop: 4 }}>⚠ {errors.name}</div>}
+              </div>
             )}
-            <input className="input" type="email" placeholder="Email address" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-            <input className="input" type="password" placeholder="Password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+
+            <div>
+              <input className="input" type="email" placeholder="Email address"
+                value={form.email}
+                onChange={e => { setForm({ ...form, email: e.target.value }); setErrors({ ...errors, email: "" }); }}
+                style={{ width: "100%", borderColor: errors.email ? "#ff6b6b" : undefined }}
+              />
+              {errors.email && <div style={{ fontSize: 11, color: "#ff6b6b", marginTop: 4 }}>⚠ {errors.email}</div>}
+            </div>
+
+            <div>
+              <div style={{ position: "relative" }}>
+                <input className="input" type={showPass ? "text" : "password"} placeholder="Password"
+                  value={form.password}
+                  onChange={e => { setForm({ ...form, password: e.target.value }); setErrors({ ...errors, password: "" }); }}
+                  style={{ width: "100%", paddingRight: 44, borderColor: errors.password ? "#ff6b6b" : undefined }}
+                />
+                <button onClick={() => setShowPass(!showPass)}
+                  style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "var(--text-dim)", fontSize: 14 }}>
+                  {showPass ? "🙈" : "👁"}
+                </button>
+              </div>
+              {errors.password && <div style={{ fontSize: 11, color: "#ff6b6b", marginTop: 4 }}>⚠ {errors.password}</div>}
+            </div>
 
             {tab === "login" && (
-              <button className="btn-ghost" style={{ padding: 0, fontSize: 13, color: "var(--accent)", justifyContent: "flex-end" }}>
+              <button style={{ background: "none", border: "none", cursor: "pointer", fontSize: 13, color: "var(--accent)", textAlign: "right", padding: 0, fontFamily: "var(--font-body)" }}>
                 Forgot password?
               </button>
             )}
 
-            <button className="btn-primary" onClick={handleAuth} disabled={loading} style={{ justifyContent: "center", padding: "14px" }}>
+            {/* Submit */}
+            <button onClick={handleAuth} disabled={loading}
+              style={{
+                padding: "15px", borderRadius: 10, border: "none", cursor: loading ? "not-allowed" : "pointer",
+                background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+                color: "#fff", fontFamily: "var(--font-display)", fontWeight: 800,
+                fontSize: 15, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                opacity: loading ? 0.8 : 1, transition: "opacity 0.2s ease",
+              }}>
               {loading ? (
-                <span style={{ display: "inline-block", width: 18, height: 18, border: "2px solid white", borderTopColor: "transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                <span style={{ width: 20, height: 20, border: "2px solid rgba(255,255,255,0.4)", borderTopColor: "#fff", borderRadius: "50%", display: "inline-block", animation: "spin 0.8s linear infinite" }} />
               ) : (
-                tab === "login" ? "Sign In" : "Create Account"
+                tab === "login" ? "Sign In to ZROM 🔥" : "Create My Account 🚀"
               )}
             </button>
           </div>
+
+          {/* ── BOTTOM NOTE ── */}
+          <p style={{ textAlign: "center", fontSize: 12, color: "var(--text-dim)", marginTop: 20, lineHeight: 1.6 }}>
+            By continuing, you agree to ZROM's{" "}
+            <span style={{ color: "var(--accent)", cursor: "pointer" }}>Terms</span> &{" "}
+            <span style={{ color: "var(--accent)", cursor: "pointer" }}>Privacy Policy</span>
+          </p>
+        </div>
+
+        {/* Trust */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 20, marginTop: 24 }}>
+          {["🔒 Secure", "✅ Verified", "🚀 Fast"].map(t => (
+            <span key={t} style={{ fontSize: 12, color: "var(--text-dim)" }}>{t}</span>
+          ))}
         </div>
       </div>
     </div>
@@ -1635,89 +2122,265 @@ const LoginPage = ({ setPage }) => {
 // --- PROFILE PAGE ---
 const ProfilePage = ({ setPage }) => {
   const { state, dispatch } = useContext(AppContext);
+  const [activeTab, setActiveTab] = useState("orders");
 
   if (!state.user) {
     return (
-      <div className="page" style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "80vh", gap: 20 }}>
-        <div style={{ fontSize: 48 }}>👤</div>
-        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 28 }}>Sign in to view your profile</h2>
-        <button className="btn-primary" onClick={() => setPage("login")}>Sign In / Register</button>
+      <div className="page" style={{
+        display: "flex", flexDirection: "column", alignItems: "center",
+        justifyContent: "center", minHeight: "100vh", gap: 20,
+        background: "radial-gradient(circle at 50% 40%, rgba(255,77,28,0.06) 0%, transparent 60%)",
+      }}>
+        <div style={{ fontSize: 64 }}>👤</div>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, letterSpacing: -1 }}>
+          Sign in to ZROM
+        </h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 15 }}>Access your orders, wishlist & rewards</p>
+        <button className="btn-primary" onClick={() => setPage("login")}
+          style={{ padding: "14px 36px", fontSize: 15 }}>
+          Sign In / Register 🔥
+        </button>
       </div>
     );
   }
 
   const orders = [
-    { id: "#NX-00123", date: "May 8, 2025", status: "Delivered", total: 189, items: 1 },
-    { id: "#NX-00118", date: "Apr 22, 2025", status: "Shipped", total: 348, items: 2 },
-    { id: "#NX-00102", date: "Apr 5, 2025", status: "Delivered", total: 79, items: 3 },
+    { id: "#ZR-00123", date: "May 8, 2026", status: "Delivered", total: 189, items: 1 },
+    { id: "#ZR-00118", date: "Apr 22, 2026", status: "Shipped", total: 348, items: 2 },
+    { id: "#ZR-00102", date: "Apr 5, 2026", status: "Delivered", total: 79, items: 3 },
   ];
 
-  const statusColor = { Delivered: "var(--neon)", Shipped: "var(--blue)", Processing: "var(--gold)" };
+  const statusColor = {
+    Delivered: "var(--neon)",
+    Shipped: "var(--blue)",
+    Processing: "var(--gold)",
+  };
+
+  const statusBg = {
+    Delivered: "rgba(0,255,136,0.08)",
+    Shipped: "rgba(59,130,246,0.08)",
+    Processing: "rgba(245,158,11,0.08)",
+  };
+
+  const tabs = [
+    { id: "orders", label: "Orders", emoji: "📦" },
+    { id: "wishlist", label: "Wishlist", emoji: "❤️" },
+    { id: "rewards", label: "Rewards", emoji: "⭐" },
+    { id: "settings", label: "Settings", emoji: "⚙️" },
+  ];
 
   return (
     <div className="page">
       <section className="section">
-        <div className="container" style={{ maxWidth: 900 }}>
-          {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 48, padding: "28px 32px", background: "var(--surface)", borderRadius: "var(--r-xl)", border: "1px solid var(--border)" }}>
-            <div style={{ width: 64, height: 64, borderRadius: "50%", background: "linear-gradient(135deg, var(--accent), var(--accent2))", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "white" }}>
-              {state.user.name.charAt(0)}
+        <div className="container" style={{ maxWidth: 960 }}>
+
+          {/* ── PROFILE HEADER ── */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 24,
+            marginBottom: 32, padding: "28px 32px",
+            background: "linear-gradient(135deg, var(--surface), var(--card))",
+            borderRadius: "var(--r-xl)", border: "1px solid var(--border)",
+            position: "relative", overflow: "hidden",
+          }}>
+            {/* BG glow */}
+            <div style={{ position: "absolute", top: -40, right: -40, width: 200, height: 200, background: "radial-gradient(circle, rgba(255,77,28,0.08) 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
+
+            {/* Avatar */}
+            <div style={{
+              width: 72, height: 72, borderRadius: "50%", flexShrink: 0,
+              background: "linear-gradient(135deg, var(--accent), var(--accent2))",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 28, color: "#fff",
+              boxShadow: "0 0 24px rgba(255,77,28,0.3)",
+            }}>
+              {state.user.name.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22 }}>{state.user.name}</div>
+
+            <div style={{ flex: 1 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>
+                  {state.user.name}
+                </div>
+                <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 20, background: "rgba(255,77,28,0.15)", color: "var(--accent)", border: "1px solid rgba(255,77,28,0.3)" }}>
+                  ZROM MEMBER
+                </span>
+              </div>
               <div style={{ color: "var(--text-dim)", fontSize: 14 }}>{state.user.email}</div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>
+                Member since SS26 · 3 orders placed
+              </div>
             </div>
-            <button className="btn-outline" onClick={() => { dispatch({ type: "LOGOUT" }); setPage("home"); }} style={{ marginLeft: "auto" }}>
-              Sign Out
-            </button>
+
+            <button
+              onClick={() => { dispatch({ type: "LOGOUT" }); setPage("home"); }}
+              style={{
+                padding: "10px 20px", borderRadius: 10,
+                background: "var(--surface)", border: "1px solid var(--border)",
+                color: "var(--text-mid)", fontFamily: "var(--font-body)",
+                fontWeight: 600, fontSize: 13, cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = "#ff6b6b"; e.currentTarget.style.color = "#ff6b6b"; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.color = "var(--text-mid)"; }}
+            >Sign Out</button>
           </div>
 
-          {/* Stats */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 40 }}>
+          {/* ── STATS ── */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14, marginBottom: 32 }}>
             {[
-              { label: "Orders", val: "3" },
-              { label: "Wishlist", val: state.wishlist.length },
-              { label: "Points", val: "820" },
-              { label: "Saved", val: "$68" },
+              { label: "Orders", val: "3", icon: "📦", color: "var(--accent)" },
+              { label: "Wishlist", val: state.wishlist?.length || 0, icon: "❤️", color: "#ff6b9d" },
+              { label: "Points", val: "820", icon: "⭐", color: "var(--gold)" },
+              { label: "Saved", val: "$68", icon: "💰", color: "var(--neon)" },
             ].map(s => (
-              <div key={s.label} style={{ padding: "20px 24px", background: "var(--surface)", borderRadius: "var(--r-md)", border: "1px solid var(--border)", textAlign: "center" }}>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, color: "var(--accent)" }}>{s.val}</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>{s.label}</div>
+              <div key={s.label} style={{
+                padding: "20px", background: "var(--surface)",
+                borderRadius: "var(--r-md)", border: "1px solid var(--border)",
+                textAlign: "center", transition: "border-color 0.2s ease",
+              }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = s.color}
+                onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border)"}
+              >
+                <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 26, color: s.color }}>{s.val}</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{s.label}</div>
               </div>
             ))}
           </div>
 
-          {/* Orders */}
-          <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, marginBottom: 20 }}>Order History</h3>
-          <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 40 }}>
-            {orders.map(o => (
-              <div key={o.id} className="card" style={{ padding: "20px 24px", display: "flex", alignItems: "center", gap: 20 }}>
-                <div style={{ width: 44, height: 44, borderRadius: "var(--r-sm)", background: "rgba(255,77,28,0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--accent)" }}>
-                  <Icon name="package" size={20} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600 }}>{o.id}</div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)" }}>{o.date} · {o.items} item{o.items > 1 ? "s" : ""}</div>
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 600, color: statusColor[o.status] || "var(--text-dim)" }}>{o.status}</span>
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 700 }}>${o.total}</span>
-              </div>
+          {/* ── TABS ── */}
+          <div style={{ display: "flex", gap: 4, background: "var(--surface)", borderRadius: 12, padding: 4, marginBottom: 28, border: "1px solid var(--border)" }}>
+            {tabs.map(t => (
+              <button key={t.id} onClick={() => setActiveTab(t.id)}
+                style={{
+                  flex: 1, padding: "10px 8px", borderRadius: 8, border: "none", cursor: "pointer",
+                  background: activeTab === t.id ? "var(--accent)" : "transparent",
+                  color: activeTab === t.id ? "#fff" : "var(--text-dim)",
+                  fontFamily: "var(--font-body)", fontWeight: 600, fontSize: 13,
+                  transition: "all 0.2s ease", display: "flex", alignItems: "center",
+                  justifyContent: "center", gap: 6,
+                }}>
+                <span>{t.emoji}</span>
+                <span>{t.label}</span>
+              </button>
             ))}
           </div>
 
-          {/* Wishlist */}
-          {state.wishlist.length > 0 && (
-            <>
-              <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, marginBottom: 20 }}>
-                Wishlist <span style={{ color: "var(--text-dim)", fontSize: 16 }}>({state.wishlist.length})</span>
-              </h3>
+          {/* ── ORDERS TAB ── */}
+          {activeTab === "orders" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {orders.map(o => (
+                <div key={o.id} style={{
+                  padding: "20px 24px", display: "flex", alignItems: "center", gap: 20,
+                  background: "var(--surface)", border: "1px solid var(--border)",
+                  borderRadius: "var(--r-md)", transition: "border-color 0.2s ease",
+                }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <div style={{
+                    width: 44, height: 44, borderRadius: "var(--r-sm)", flexShrink: 0,
+                    background: "rgba(255,77,28,0.1)", display: "flex",
+                    alignItems: "center", justifyContent: "center", fontSize: 20,
+                  }}>📦</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 15, color: "var(--white)", marginBottom: 2 }}>{o.id}</div>
+                    <div style={{ fontSize: 13, color: "var(--text-dim)" }}>{o.date} · {o.items} item{o.items > 1 ? "s" : ""}</div>
+                  </div>
+                  <span style={{
+                    fontSize: 12, fontWeight: 700, padding: "4px 12px", borderRadius: 20,
+                    color: statusColor[o.status], background: statusBg[o.status],
+                    border: `1px solid ${statusColor[o.status]}33`,
+                  }}>{o.status}</span>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--white)" }}>${o.total}</span>
+                  <button style={{
+                    padding: "7px 16px", borderRadius: 8, background: "var(--card)",
+                    border: "1px solid var(--border)", color: "var(--text-mid)",
+                    fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)",
+                  }}>Track</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ── WISHLIST TAB ── */}
+          {activeTab === "wishlist" && (
+            state.wishlist?.length > 0 ? (
               <div className="grid-4">
                 {state.wishlist.map(p => (
                   <ProductCard key={p.id} product={p} onView={() => {}} />
                 ))}
               </div>
-            </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "60px 0", color: "var(--text-dim)" }}>
+                <div style={{ fontSize: 56, marginBottom: 16 }}>❤️</div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 20, color: "var(--text-mid)", marginBottom: 8 }}>Wishlist is empty</div>
+                <button className="btn-primary" onClick={() => setPage("products")} style={{ marginTop: 8 }}>
+                  Browse Products
+                </button>
+              </div>
+            )
           )}
+
+          {/* ── REWARDS TAB ── */}
+          {activeTab === "rewards" && (
+            <div>
+              {/* Points card */}
+              <div style={{
+                padding: "32px", borderRadius: "var(--r-xl)", marginBottom: 24,
+                background: "linear-gradient(135deg, rgba(255,77,28,0.15), rgba(255,140,66,0.08))",
+                border: "1px solid rgba(255,77,28,0.25)", textAlign: "center",
+              }}>
+                <div style={{ fontSize: 40, marginBottom: 8 }}>⭐</div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 48, color: "var(--accent)" }}>820</div>
+                <div style={{ color: "var(--text-mid)", fontSize: 15, marginBottom: 16 }}>ZROM Points</div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>180 points away from <span style={{ color: "var(--gold)", fontWeight: 700 }}>Gold Status 🏆</span></div>
+                {/* Progress */}
+                <div style={{ height: 6, background: "var(--border)", borderRadius: 4, margin: "16px auto", maxWidth: 300, overflow: "hidden" }}>
+                  <div style={{ height: "100%", width: "82%", background: "linear-gradient(90deg, var(--accent), var(--accent2))", borderRadius: 4 }} />
+                </div>
+              </div>
+              {/* Perks */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
+                {[
+                  { emoji: "🎁", title: "Free Gift", desc: "At 1000 points", locked: true },
+                  { emoji: "💸", title: "10% Off", desc: "Next order", locked: false },
+                  { emoji: "🚚", title: "Free Express", desc: "Shipping upgrade", locked: false },
+                ].map(p => (
+                  <div key={p.title} style={{
+                    padding: "20px", background: "var(--surface)", borderRadius: "var(--r-md)",
+                    border: `1px solid ${p.locked ? "var(--border)" : "rgba(255,77,28,0.3)"}`,
+                    textAlign: "center", opacity: p.locked ? 0.5 : 1,
+                  }}>
+                    <div style={{ fontSize: 28, marginBottom: 8 }}>{p.emoji}</div>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: "var(--white)" }}>{p.title}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>{p.desc}</div>
+                    {p.locked && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 8 }}>🔒 Locked</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* ── SETTINGS TAB ── */}
+          {activeTab === "settings" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              {[
+                { label: "Full Name", value: state.user.name, type: "text" },
+                { label: "Email", value: state.user.email, type: "email" },
+                { label: "Phone", value: "+1 (555) 000-0000", type: "tel" },
+              ].map(f => (
+                <div key={f.label}>
+                  <label style={{ fontSize: 12, color: "var(--text-dim)", fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", display: "block", marginBottom: 6 }}>{f.label}</label>
+                  <input className="input" type={f.type} defaultValue={f.value} style={{ width: "100%" }} />
+                </div>
+              ))}
+              <button className="btn-primary" style={{ alignSelf: "flex-start", padding: "12px 28px", marginTop: 8 }}>
+                Save Changes
+              </button>
+            </div>
+          )}
+
         </div>
       </section>
     </div>
