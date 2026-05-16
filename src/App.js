@@ -1,5 +1,11 @@
 import { useState, useEffect, createContext, useContext, useReducer } from "react";
-
+import { auth } from "./firebase";
+import { 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup
+} from "firebase/auth";
 // ============================================================
 // GLOBAL STYLES
 // ============================================================
