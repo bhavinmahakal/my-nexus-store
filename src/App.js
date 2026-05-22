@@ -2542,6 +2542,72 @@ const PrivacyPage = () => (
     </section>
   </div>
 );
+// ADMINPAGE
+const AdminPage = ({ setPage }) => {
+  const [authed, setAuthed] = useState(false);
+  const [pass, setPass] = useState("");
+  const [showPass, setShowPass] = useState(false);  // ← add karo
+
+  if (!authed) return (
+    <div className="page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-xl)", padding: "40px", width: 360 }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, marginBottom: 24 }}>Admin Access 🔒</h2>
+        
+        <div style={{ position: "relative", marginBottom: 16 }}>
+          <input 
+            className="input" 
+            type={showPass ? "text" : "password"}  // ← change karo
+            placeholder="Password" 
+            value={pass} 
+            onChange={e => setPass(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") { if (pass === "zrom2026") setAuthed(true); }}}  // ← Enter key support
+          />
+          <button 
+  onClick={() => setShowPass(!showPass)}
+  style={{ 
+    position: "absolute", right: 12, top: "50%", 
+    transform: "translateY(-50%)", 
+    background: "none", border: "none", 
+    cursor: "pointer", 
+    color: showPass ? "var(--accent)" : "var(--text-dim)",
+    display: "flex", alignItems: "center"
+  }}>
+  <Icon name="eye" size={16} />
+</button>
+        </div>
+
+        <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }}
+          onClick={() => { if (pass === "zrom2026") setAuthed(true); }}>
+          Enter
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="page">
+      <section className="section">
+        <div className="container">
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 40, marginBottom: 32 }}>Admin Panel 🛠️</h1>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20 }}>
+            {[
+              { label: "Total Orders", val: "3", icon: "📦", color: "var(--accent)" },
+              { label: "Revenue", val: "$616", icon: "💰", color: "var(--neon)" },
+              { label: "Users", val: "1", icon: "👤", color: "var(--blue)" },
+              { label: "Products", val: "8", icon: "🛍️", color: "var(--gold)" },
+            ].map(s => (
+              <div key={s.label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "24px", textAlign: "center" }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>{s.icon}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 32, color: s.color }}>{s.val}</div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 4 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
 
 // --- 404 PAGE ---
 const NotFoundPage = ({ setPage }) => (
@@ -2561,6 +2627,7 @@ const NotFoundPage = ({ setPage }) => (
 // ============================================================
 // APP ROOT
 // ============================================================
+
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [page, setPage] = useState("home");
@@ -2573,6 +2640,15 @@ export default function App() {
     }
   });
   return () => unsubscribe();
+}, []);
+useEffect(() => {
+  const handleKey = (e) => {
+    if (e.ctrlKey && e.shiftKey && e.key === "A") {
+      setPage("admin");
+    }
+  };
+  window.addEventListener("keydown", handleKey);
+  return () => window.removeEventListener("keydown", handleKey);
 }, []);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
@@ -2593,6 +2669,48 @@ export default function App() {
       case "profile": return <ProfilePage setPage={setPage} />;
       case "refunds": return <RefundsPage />;
       case "privacy": case "terms": return <PrivacyPage />;
+      case "admin": return <AdminPage setPage={setPage} />;
+      const AdminPage = ({ setPage }) => {
+  const [authed, setAuthed] = useState(false);
+  const [pass, setPass] = useState("");
+
+  if (!authed) return (
+    <div className="page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-xl)", padding: "40px", width: 360 }}>
+        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, marginBottom: 24 }}>Admin Access 🔒</h2>
+        <input className="input" type="password" placeholder="Password" value={pass} onChange={e => setPass(e.target.value)} style={{ marginBottom: 16 }} />
+        <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }}
+          onClick={() => { if (pass === "zrom2026") setAuthed(true); }}>
+          Enter
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="page">
+      <section className="section">
+        <div className="container">
+          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 40, marginBottom: 32 }}>Admin Panel 🛠️</h1>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20 }}>
+            {[
+              { label: "Total Orders", val: "3", icon: "📦", color: "var(--accent)" },
+              { label: "Revenue", val: "$616", icon: "💰", color: "var(--neon)" },
+              { label: "Users", val: "1", icon: "👤", color: "var(--blue)" },
+              { label: "Products", val: "8", icon: "🛍️", color: "var(--gold)" },
+            ].map(s => (
+              <div key={s.label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "24px", textAlign: "center" }}>
+                <div style={{ fontSize: 32, marginBottom: 8 }}>{s.icon}</div>
+                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 32, color: s.color }}>{s.val}</div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 4 }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+};
       default: return <NotFoundPage setPage={setPage} />;
     }
   };
