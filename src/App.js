@@ -225,6 +225,13 @@ const GlobalStyles = () => (
       .grid-3 { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
+       @media (max-width: 640px) {
+  /* ...existing rules... */
+  :root {
+    --hero-cols: 1fr;
+    --hero-gap: 32px;
+  }
+}
       .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
       .section { padding: 48px 0; }
       .container { padding: 0 16px; }
@@ -1145,7 +1152,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
         <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }} />
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
 
-        <div className="container" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center", padding: "80px 24px" }}>
+        <div className="container" style={{ display: "grid", gridTemplateColumns: "var(--hero-cols, 1fr 1fr)", gap: "var(--hero-gap, 64px)", alignItems: "center", padding: "80px 24px" }}>
           <div style={{ animation: "fadeUp 0.8s ease" }}>
             <div className="badge badge-neon" style={{ marginBottom: 24 }}>
               <Icon name="bolt" size={11} /> NEW DROP SS26
@@ -1196,12 +1203,13 @@ const HomePage = ({ setPage, onViewProduct }) => {
               />
             </div>
             {/* Floating cards */}
-            <div style={{ position: "absolute", bottom: 32, left: -32, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "16px 20px", backdropFilter: "blur(12px)", animation: "float 5s ease-in-out infinite" }}>
+            
+            <div style={{ position: "absolute", bottom: 24, left: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "16px 20px", backdropFilter: "blur(12px)", animation: "float 5s ease-in-out infinite" }}>
               <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Just Purchased</div>
               <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>Obsidian Pro Runner</div>
               <div style={{ fontSize: 12, color: "var(--neon)", marginTop: 4 }}>2 min ago · US 10</div>
             </div>
-            <div style={{ position: "absolute", top: 32, right: -24, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "14px 18px", animation: "float 7s ease-in-out infinite reverse" }}>
+            <div style={{ position: "absolute", top: 24, right: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "14px 18px", animation: "float 7s ease-in-out infinite reverse" }}>>
               <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Free Shipping</div>
               <div style={{ fontWeight: 700, color: "var(--neon)", fontSize: 14 }}>Orders over $50</div>
             </div>
