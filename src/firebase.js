@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCZyvDWQGOD810e49zwNoWT6vHngfVYbIk",
+  apiKey: "AIzaSyCZyvDWQGOD81Oe49zwNoWT6vHngfVYbIk",
   authDomain: "zrom-store.firebaseapp.com",
   projectId: "zrom-store",
   storageBucket: "zrom-store.firebasestorage.app",

@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext, useReducer } from "react";
-import { auth } from "./firebase";
+import { auth, db } from "./firebase";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
@@ -761,9 +762,26 @@ const CartSidebar = () => {
             <button
               className="btn-primary"
               style={{ width: "100%", justifyContent: "center", padding: "15px", fontSize: 15, fontWeight: 800 }}
-              onClick={() => dispatch({ type: "CLOSE_CART" })}>
-              Checkout <Icon name="arrowRight" size={16} />
-            </button>
+              onClick={async () => {
+  if (!state.user) {
+    dispatch({ type: "CLOSE_CART" });
+    dispatch({ type: "SET_TOAST", toast: { title: "Login Required!", msg: "Please login to checkout" } });
+    return;
+  }
+   await addDoc(collection(db, "orders"), {
+    userId: state.user.uid,
+    items: state.cart,
+    amount: total,
+    status: "pending",
+    createdAt: serverTimestamp(),
+  });
+  dispatch({ type: "CLEAR_CART" });
+  dispatch({ type: "CLOSE_CART" });
+  dispatch({ type: "SET_TOAST", toast: { title: "Order Placed! 🎉", msg: "Check your profile for details" } });
+}}>
+        Checkout <Icon name="arrowRight" size={16} />
+      </button>
+
 
             <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 14 }}>
               {["💳", "🔒", "📦"].map((icon, i) => (
@@ -865,7 +883,22 @@ const Navbar = ({ page, setPage }) => {
             onMouseLeave={e => e.target.style.opacity = 1}
             className="desktop-nav"
           >Shop Now</button>
-
+          <button
+  onClick={() => setPage("login")}
+  style={{
+    background: "var(--surface)",
+    border: "1px solid var(--border)",
+    borderRadius: 8,
+    padding: "8px 16px",
+    color: "var(--text)",
+    fontSize: 14,
+    fontWeight: 600,
+    cursor: "pointer",
+  }}
+  className="desktop-nav"
+>
+  Login
+</button>
           {/* Hamburger — mobile only */}
           <button onClick={() => setMenuOpen(!menuOpen)}
             className="mobile-menu-btn"
@@ -2209,13 +2242,13 @@ const ProfilePage = ({ setPage }) => {
               fontFamily: "var(--font-display)", fontWeight: 900, fontSize: 28, color: "#fff",
               boxShadow: "0 0 24px rgba(255,77,28,0.3)",
             }}>
-              {state.user.name.charAt(0).toUpperCase()}
+              {(state.user.displayName || state.user.email || "U").charAt(0).toUpperCase()}
             </div>
 
             <div style={{ flex: 1 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                 <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>
-                  {state.user.name}
+                  {state.user.displayName || state.user.email}
                 </div>
                 <span style={{ fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 20, background: "rgba(255,77,28,0.15)", color: "var(--accent)", border: "1px solid rgba(255,77,28,0.3)" }}>
                   ZROM MEMBER
@@ -2382,7 +2415,7 @@ const ProfilePage = ({ setPage }) => {
           {activeTab === "settings" && (
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {[
-                { label: "Full Name", value: state.user.name, type: "text" },
+                { label: "Full Name", value: state.user.displayName || state.user.email, type: "text" },
                 { label: "Email", value: state.user.email, type: "email" },
                 { label: "Phone", value: "+1 (555) 000-0000", type: "tel" },
               ].map(f => (
