@@ -4,7 +4,8 @@ import {
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  onAuthStateChanged 
 } from "firebase/auth";
 // ============================================================
 // GLOBAL STYLES
@@ -1943,6 +1944,7 @@ const LoginPage = ({ setPage }) => {
   const [showPass, setShowPass] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // eslint-disable-next-line no-unused-vars
   const validate = () => {
     const e = {};
     if (!form.email.includes("@")) e.email = "Valid email required";
@@ -1952,26 +1954,34 @@ const LoginPage = ({ setPage }) => {
     return Object.keys(e).length === 0;
   };
 
-  const handleAuth = () => {
-    if (!validate()) return;
-    setLoading(true);
-    setTimeout(() => {
-      dispatch({ type: "SET_USER", user: { name: form.name || "Customer", email: form.email } });
-      dispatch({ type: "SET_TOAST", toast: { title: "Welcome back! 🔥", msg: `Signed in as ${form.email}` } });
-      setLoading(false);
-      setPage("profile");
-    }, 1200);
-  };
+  const handleAuth = async () => {
+  setLoading(true);
+  try {
+    if (tab === "login") {
+      await signInWithEmailAndPassword(auth, form.email, form.password);
+    } else {
+      await createUserWithEmailAndPassword(auth, form.email, form.password);
+    }
+    dispatch({ type: "SET_TOAST", toast: { title: "Welcome! 🔥", msg: form.email } });
+    setPage("profile");
+  } catch (err) {
+    setErrors({ email: err.message });
+  }
+  setLoading(false);
+};
 
-  const handleGoogle = () => {
-    setLoading(true);
-    setTimeout(() => {
-      dispatch({ type: "SET_USER", user: { name: "Google User", email: "user@gmail.com" } });
-      dispatch({ type: "SET_TOAST", toast: { title: "Welcome! 🔥", msg: "Signed in with Google" } });
-      setLoading(false);
-      setPage("profile");
-    }, 1000);
-  };
+  const handleGoogle = async () => {
+  setLoading(true);
+  try {
+    const provider = new GoogleAuthProvider();
+    await signInWithPopup(auth, provider);
+    dispatch({ type: "SET_TOAST", toast: { title: "Welcome! 🔥", msg: "Signed in with Google" } });
+    setPage("profile");
+  } catch (err) {
+    setErrors({ email: err.message });
+  }
+  setLoading(false);
+};
 
   return (
     <div className="page" style={{
@@ -2521,6 +2531,16 @@ const NotFoundPage = ({ setPage }) => (
 export default function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [page, setPage] = useState("home");
+  useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (user) {
+      dispatch({ type: "SET_USER", user });
+    } else {
+      dispatch({ type: "LOGOUT" });
+    }
+  });
+  return () => unsubscribe();
+}, []);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
   const handleViewProduct = (product) => {
