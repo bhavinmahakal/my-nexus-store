@@ -347,6 +347,7 @@ const GlobalStyles = () => (
      @media (max-width: 768px) {
       .desktop-nav { display: none !important; }
       .mobile-menu-btn { display: flex !important; }
+        .hero-float { display: none !important; }
     }
 
   `}</style>
@@ -1209,12 +1210,12 @@ const HomePage = ({ setPage, onViewProduct }) => {
             </div>
             {/* Floating cards */}
             
-            <div style={{ position: "absolute", bottom: 24, left: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "16px 20px", backdropFilter: "blur(12px)", animation: "float 5s ease-in-out infinite" }}>
+            <div className="hero-float" style={{ position: "absolute", bottom: 24, left: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "16px 20px", backdropFilter: "blur(12px)", animation: "float 5s ease-in-out infinite" }}>
               <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Just Purchased</div>
               <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>Obsidian Pro Runner</div>
               <div style={{ fontSize: 12, color: "var(--neon)", marginTop: 4 }}>2 min ago · US 10</div>
             </div>
-            <div style={{ position: "absolute", top: 24, right: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "14px 18px", animation: "float 7s ease-in-out infinite reverse" }}>>
+            <div className="hero-float" style={{ position: "absolute", top: 24, right: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "14px 18px", animation: "float 7s ease-in-out infinite reverse" }}>
               <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Free Shipping</div>
               <div style={{ fontWeight: 700, color: "var(--neon)", fontSize: 14 }}>Orders over $50</div>
             </div>
