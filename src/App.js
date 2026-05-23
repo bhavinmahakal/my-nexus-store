@@ -1135,6 +1135,12 @@ const Footer = ({ setPage }) => (
 const HomePage = ({ setPage, onViewProduct }) => {
   const [email, setEmail] = useState("");
   const [subDone, setSubDone] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+  const handler = () => setIsMobile(window.innerWidth <= 768);
+  window.addEventListener("resize", handler);
+  return () => window.removeEventListener("resize", handler);
+}, []);
 
   return (
     <div className="page">
@@ -1146,7 +1152,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
         position: "relative", overflow: "hidden"
       }}>
         {/* BG elements */}
-        <div className="container hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center", padding: "80px 24px" }}></div>
+        <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr", gap: isMobile ?32 : 64, alignItems: "center", padding: isMobile ?  "48px 16px" : "80px 24px" }}></div>
         <div style={{ position: "absolute", top: "10%", right: "5%", width: 500, height: 500, background: "radial-gradient(circle, rgba(255,77,28,0.12) 0%, transparent 70%)", borderRadius: "50%", animation: "float 6s ease-in-out infinite" }} />
         <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }} />
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
@@ -2478,7 +2484,7 @@ const RefundsPage = () => {
             <div className="card" style={{ padding: "40px" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, marginBottom: 28 }}>Request a Return</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <div className="container hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center", padding: "80px 24px" }}>
+                <div className="container" style={{display: "grid", gridTemplateColumns: window.innerWidth <= 768 ? "1fr" : "1fr 1fr", gap: window.innerWidth <= 768 ? 32 : 64, alignItems: "center", padding: window.innerWidth <= 768 ? "48px 16px" : "80px 24px" }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 6, display: "block", color: "var(--text-mid)" }}>Order Number</label>
                     <input className="input" placeholder="#NX-00000" value={form.order} onChange={e => setForm({ ...form, order: e.target.value })} />
