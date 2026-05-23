@@ -1149,7 +1149,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
         position: "relative", overflow: "hidden"
       }}>
         {/* BG elements */}
-        <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ?32 : 64, alignItems: "center", padding: isMobile ?  "48px 16px" : "80px 24px" }}></div>
+        <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 64, alignItems: "center", padding: isMobile ? "48px 16px" : "80px 24px" }}></div>
         <div style={{ position: "absolute", top: "10%", right: "5%", width: 500, height: 500, background: "radial-gradient(circle, rgba(255,77,28,0.12) 0%, transparent 70%)", borderRadius: "50%", animation: "float 6s ease-in-out infinite" }} />
         <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }} />
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
@@ -2556,7 +2556,7 @@ const PrivacyPage = () => (
 const AdminPage = ({ setPage }) => {
   const [authed, setAuthed] = useState(false);
   const [pass, setPass] = useState("");
-  const [showPass, setShowPass] = useState(false);  // ← add karo
+  const [showPass, setShowPass] = useState(false);
 
   if (!authed) return (
     <div className="page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
@@ -2566,7 +2566,7 @@ const AdminPage = ({ setPage }) => {
         <div style={{ position: "relative", marginBottom: 16 }}>
           <input 
             className="input" 
-            type={showPass ? "text" : "password"}  // ← change karo
+            type={showPass ? "text" : "password"} 
             placeholder="Password" 
             value={pass} 
             onChange={e => setPass(e.target.value)}
@@ -2680,47 +2680,6 @@ useEffect(() => {
       case "refunds": return <RefundsPage />;
       case "privacy": case "terms": return <PrivacyPage />;
       case "admin": return <AdminPage setPage={setPage} />;
-      const AdminPage = ({ setPage }) => {
-  const [authed, setAuthed] = useState(false);
-  const [pass, setPass] = useState("");
-
-  if (!authed) return (
-    <div className="page" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
-      <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-xl)", padding: "40px", width: 360 }}>
-        <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 28, marginBottom: 24 }}>Admin Access 🔒</h2>
-        <input className="input" type="password" placeholder="Password" value={pass} onChange={e => setPass(e.target.value)} style={{ marginBottom: 16 }} />
-        <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }}
-          onClick={() => { if (pass === "zrom2026") setAuthed(true); }}>
-          Enter
-        </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <div className="page">
-      <section className="section">
-        <div className="container">
-          <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 40, marginBottom: 32 }}>Admin Panel 🛠️</h1>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20 }}>
-            {[
-              { label: "Total Orders", val: "3", icon: "📦", color: "var(--accent)" },
-              { label: "Revenue", val: "$616", icon: "💰", color: "var(--neon)" },
-              { label: "Users", val: "1", icon: "👤", color: "var(--blue)" },
-              { label: "Products", val: "8", icon: "🛍️", color: "var(--gold)" },
-            ].map(s => (
-              <div key={s.label} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "24px", textAlign: "center" }}>
-                <div style={{ fontSize: 32, marginBottom: 8 }}>{s.icon}</div>
-                <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 32, color: s.color }}>{s.val}</div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 4 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-};
       default: return <NotFoundPage setPage={setPage} />;
     }
   };
