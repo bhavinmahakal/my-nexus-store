@@ -230,10 +230,6 @@ const GlobalStyles = () => (
     .container { padding: 0 16px; }
     .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 48px 16px !important; }
     }
-      .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-      .section { padding: 48px 0; }
-      .container { padding: 0 16px; }
-    }
 
     /* Toast */
     .toast {
@@ -1250,7 +1246,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
       {/* Featured Products */}
       <section className="section">
         <div className="container">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 40 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16 }}>
             <div>
               <div style={{ fontSize: 12, letterSpacing: 2, textTransform: "uppercase", color: "var(--accent)", marginBottom: 8 }}>Featured</div>
               <h2 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 36, letterSpacing: -1 }}>Trending Now</h2>
