@@ -1226,7 +1226,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
       {/* Trust Badges */}
       <section className="section-sm" style={{ borderBottom: "1px solid var(--border)" }}>
         <div className="container">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 24 }}>
+          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 24 }}>
             {[
               { icon: "truck", title: "Free Shipping", sub: "On orders over $50" },
               { icon: "shield", title: "Secure Checkout", sub: "256-bit SSL encryption" },
