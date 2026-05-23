@@ -347,7 +347,7 @@ const GlobalStyles = () => (
      @media (max-width: 768px) {
       .desktop-nav { display: none !important; }
       .mobile-menu-btn { display: flex !important; }
-        .hero-float { display: none !important; }
+      .hero-float { display: none !important; }
     }
 
   `}</style>
@@ -1153,7 +1153,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
         position: "relative", overflow: "hidden"
       }}>
         {/* BG elements */}
-        <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr", gap: isMobile ?32 : 64, alignItems: "center", padding: isMobile ?  "48px 16px" : "80px 24px" }}></div>
+        <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: isMobile ?32 : 64, alignItems: "center", padding: isMobile ?  "48px 16px" : "80px 24px" }}></div>
         <div style={{ position: "absolute", top: "10%", right: "5%", width: 500, height: 500, background: "radial-gradient(circle, rgba(255,77,28,0.12) 0%, transparent 70%)", borderRadius: "50%", animation: "float 6s ease-in-out infinite" }} />
         <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }} />
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
