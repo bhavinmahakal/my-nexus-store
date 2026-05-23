@@ -1142,82 +1142,68 @@ const HomePage = ({ setPage, onViewProduct }) => {
   return (
     <div className="page">
       {/* Hero */}
-      <section style={{
-        minHeight: "100vh",
-        display: "flex", alignItems: "center",
-        background: "linear-gradient(135deg, #090909 0%, #0d0d0d 50%, #120a06 100%)",
-        position: "relative", overflow: "hidden"
-      }}>
-        {/* BG elements */}
-        <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 64, alignItems: "center", padding: isMobile ? "48px 16px" : "80px 24px" }}></div>
-        <div style={{ position: "absolute", top: "10%", right: "5%", width: 500, height: 500, background: "radial-gradient(circle, rgba(255,77,28,0.12) 0%, transparent 70%)", borderRadius: "50%", animation: "float 6s ease-in-out infinite" }} />
-        <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }} />
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
+<section style={{
+  minHeight: "100vh",
+  display: "flex", alignItems: "center",
+  background: "linear-gradient(135deg, #090909 0%, #0d0d0d 50%, #120a06 100%)",
+  position: "relative", overflow: "hidden"
+}}>
+  <div style={{ position: "absolute", top: "10%", right: "5%", width: 500, height: 500, background: "radial-gradient(circle, rgba(255,77,28,0.12) 0%, transparent 70%)", borderRadius: "50%", animation: "float 6s ease-in-out infinite" }} />
+  <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }} />
+  <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
 
-        <div className="container" style={{ display: "grid", gridTemplateColumns: "var(--hero-cols, 1fr 1fr)", gap: "var(--hero-gap, 64px)", alignItems: "center", padding: "80px 24px" }}>
-          <div style={{ animation: "fadeUp 0.8s ease" }}>
-            <div className="badge badge-neon" style={{ marginBottom: 24 }}>
-              <Icon name="bolt" size={11} /> NEW DROP SS26
-            </div>
-            <h1 style={{
-              fontFamily: "var(--font-display)",
-              fontWeight: 800,
-              fontSize: "clamp(40px, 6vw, 80px)",
-              lineHeight: 1.05,
-              letterSpacing: -2,
-              marginBottom: 24,
-              color: "var(--white)",
-            }}>
-              Wear<br />
-              <span style={{
-                background: "linear-gradient(135deg, var(--accent), var(--accent2))",
-                WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
-                backgroundClip: "text"
-              }}>ZROM.</span>
-            </h1>
-            <p style={{ fontSize: 18, color: "var(--text-mid)", lineHeight: 1.7, maxWidth: 420, marginBottom: 40 }}>
-              Born on the streets. Built for the bold. ZROM is not just clothing — it's identity.
-            </p>
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <button className="btn-primary" onClick={() => setPage("products")} style={{ padding: "16px 36px", fontSize: 15 }}>
-                Shop Collection <Icon name="arrowRight" size={16} />
-              </button>
-              <button className="btn-outline" onClick={() => setPage("reviews")} style={{ padding: "16px 28px", fontSize: 15 }}>
-                See Reviews
-              </button>
-            </div>
-            <div style={{ display: "flex", gap: 32, marginTop: 48 }}>
-              {[["500+", "Orders Delivered"], ["15+", "Cities Reached"], ["4.9★", "Average Rating"]].map(([val, lab]) => (
-                <div key={lab}>
-                  <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--white)" }}>{val}</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{lab}</div>
-                </div>
-              ))}
-            </div>
+  <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 64, alignItems: "center", padding: isMobile ? "48px 16px" : "80px 24px" }}>
+    <div style={{ animation: "fadeUp 0.8s ease" }}>
+      <div className="badge badge-neon" style={{ marginBottom: 24 }}>
+        <Icon name="bolt" size={11} /> NEW DROP SS26
+      </div>
+      <h1 style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "clamp(40px, 6vw, 80px)", lineHeight: 1.05, letterSpacing: -2, marginBottom: 24, color: "var(--white)" }}>
+        Wear<br />
+        <span style={{ background: "linear-gradient(135deg, var(--accent), var(--accent2))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>ZROM.</span>
+      </h1>
+      <p style={{ fontSize: 18, color: "var(--text-mid)", lineHeight: 1.7, maxWidth: 420, marginBottom: 40 }}>
+        Born on the streets. Built for the bold. ZROM is not just clothing — it's identity.
+      </p>
+      <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+        <button className="btn-primary" onClick={() => setPage("products")} style={{ padding: "16px 36px", fontSize: 15 }}>
+          Shop Collection <Icon name="arrowRight" size={16} />
+        </button>
+        <button className="btn-outline" onClick={() => setPage("reviews")} style={{ padding: "16px 28px", fontSize: 15 }}>
+          See Reviews
+        </button>
+      </div>
+      <div style={{ display: "flex", gap: 32, marginTop: 48 }}>
+        {[["500+", "Orders Delivered"], ["15+", "Cities Reached"], ["4.9★", "Average Rating"]].map(([val, lab]) => (
+          <div key={lab}>
+            <div style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 24, color: "var(--white)" }}>{val}</div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{lab}</div>
           </div>
+        ))}
+      </div>
+    </div>
 
-          <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both" }}>
-            <div style={{ borderRadius: "var(--r-xl)", overflow: "hidden", aspectRatio: "3/4" }}>
-              <img
-                src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=700&q=85"
-                alt="Hero"
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
-            {/* Floating cards */}
-            
-            <div className="hero-float" style={{ position: "absolute", bottom: 24, left: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "16px 20px", backdropFilter: "blur(12px)", animation: "float 5s ease-in-out infinite" }}>
-              <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Just Purchased</div>
-              <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>Obsidian Pro Runner</div>
-              <div style={{ fontSize: 12, color: "var(--neon)", marginTop: 4 }}>2 min ago · US 10</div>
-            </div>
-            <div className="hero-float" style={{ position: "absolute", top: 24, right: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "14px 18px", animation: "float 7s ease-in-out infinite reverse" }}>
-              <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Free Shipping</div>
-              <div style={{ fontWeight: 700, color: "var(--neon)", fontSize: 14 }}>Orders over $50</div>
-            </div>
-          </div>
+    {!isMobile && (
+      <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both" }}>
+        <div style={{ borderRadius: "var(--r-xl)", overflow: "hidden", aspectRatio: "3/4" }}>
+          <img
+            src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=700&q=85"
+            alt="Hero"
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
         </div>
-      </section>
+        <div className="hero-float" style={{ position: "absolute", bottom: 24, left: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "16px 20px", backdropFilter: "blur(12px)", animation: "float 5s ease-in-out infinite" }}>
+          <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Just Purchased</div>
+          <div style={{ fontWeight: 600, fontSize: 14, marginTop: 2 }}>Obsidian Pro Runner</div>
+          <div style={{ fontSize: 12, color: "var(--neon)", marginTop: 4 }}>2 min ago · US 10</div>
+        </div>
+        <div className="hero-float" style={{ position: "absolute", top: 24, right: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "14px 18px", animation: "float 7s ease-in-out infinite reverse" }}>
+          <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Free Shipping</div>
+          <div style={{ fontWeight: 700, color: "var(--neon)", fontSize: 14 }}>Orders over $50</div>
+        </div>
+      </div>
+    )}
+  </div>
+</section>
 
       {/* Trust Badges */}
       <section className="section-sm" style={{ borderBottom: "1px solid var(--border)" }}>
