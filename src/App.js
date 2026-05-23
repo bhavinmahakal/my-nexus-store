@@ -2478,7 +2478,7 @@ const RefundsPage = () => {
             <div className="card" style={{ padding: "40px" }}>
               <h3 style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 22, marginBottom: 28 }}>Request a Return</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+                <div className="container hero-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, alignItems: "center", padding: "80px 24px" }}>
                   <div>
                     <label style={{ fontSize: 13, fontWeight: 500, marginBottom: 6, display: "block", color: "var(--text-mid)" }}>Order Number</label>
                     <input className="input" placeholder="#NX-00000" value={form.order} onChange={e => setForm({ ...form, order: e.target.value })} />
