@@ -1,6 +1,7 @@
 import { useState, useEffect, createContext, useContext, useReducer } from "react";
 import { auth, db } from "./firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { initiatePayment } from "./utils/razorpay";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
@@ -811,18 +812,32 @@ const CartSidebar = () => {
     dispatch({ type: "SET_TOAST", toast: { title: "Login Required!", msg: "Please login to checkout" } });
     return;
   }
-   await addDoc(collection(db, "orders"), {
-    userId: state.user.uid,
-    items: state.cart,
+  initiatePayment({
     amount: total,
-    status: "pending",
-    createdAt: serverTimestamp(),
+    userInfo: {
+      name: state.user.displayName || state.user.email,
+      email: state.user.email,
+    },
+    onSuccess: async (response) => {
+      await addDoc(collection(db, "orders"), {
+        userId: state.user.uid,
+        items: state.cart,
+        amount: total,
+        paymentId: response.razorpay_payment_id,
+        status: "confirmed",
+        createdAt: serverTimestamp(),
+      });
+      dispatch({ type: "CLEAR_CART" });
+      dispatch({ type: "CLOSE_CART" });
+      dispatch({ type: "SET_TOAST", toast: { title: "Order Placed! 🎉", msg: "Payment successful!" } });
+    },
+    onFailure: (error) => {
+      dispatch({ type: "SET_TOAST", toast: { title: "Payment Failed!", msg: error } });
+    },
   });
-  dispatch({ type: "CLEAR_CART" });
-  dispatch({ type: "CLOSE_CART" });
-  dispatch({ type: "SET_TOAST", toast: { title: "Order Placed! 🎉", msg: "Check your profile for details" } });
-}}>
-        Checkout <Icon name="arrowRight" size={16} />
+}}
+    >
+      Checkout <Icon name="arrowRight" size={16} />
       </button>
 
 
@@ -1224,7 +1239,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
     </div>
 
     {!isMobile && (
-      <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both", display: isMobile ? "none" : "block" }}>
+      <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both", display: isMobile ? "block" : "block" }}>
   <div style={{ borderRadius: "var(--r-xl)", overflow: "hidden", aspectRatio: isMobile ? "16/9" : "3/4" }}>
     <img
       src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=700&q=85"
