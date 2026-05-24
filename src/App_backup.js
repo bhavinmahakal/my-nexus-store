@@ -224,40 +224,12 @@ const GlobalStyles = () => (
       .grid-4 { grid-template-columns: repeat(2, 1fr); }
       .grid-3 { grid-template-columns: repeat(2, 1fr); }
     }
-   @media (max-width: 640px) {
-  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .section { padding: 48px 0; }
-  .container { padding: 0 16px; }
-
-  /* Hero */
-  .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 60px 16px 40px !important; }
-  .hero-image { display: none !important; }
-  .hero-stats { gap: 16px !important; }
-
-  /* Trust badges */
-  .trust-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; }
-
-  /* Footer */
-  .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 32px !important; }
-  .footer-brand { grid-column: 1 / -1 !important; }
-
-  /* Profile */
-  .profile-header { flex-direction: column !important; text-align: center !important; }
-  .profile-stats { grid-template-columns: repeat(2, 1fr) !important; }
-  .profile-tabs { font-size: 11px !important; }
-
-  /* Cart */
-  .cart-sidebar { width: 100vw !important; }
-
-  /* Buttons */
-  .btn-primary, .btn-outline { padding: 12px 20px !important; font-size: 13px !important; }
-
-  /* Toast */
-  .toast { left: 16px !important; right: 16px !important; bottom: 16px !important; max-width: 100% !important; }
-
-  /* Admin */
-  .admin-grid { grid-template-columns: repeat(2, 1fr) !important; }
-}
+    @media (max-width: 640px) {
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .section { padding: 48px 0; }
+    .container { padding: 0 16px; }
+    .hero-grid { grid-template-columns: 1fr !important; gap: 32px !important; padding: 48px 16px !important; }
+    }
 
     /* Toast */
     .toast {
@@ -382,19 +354,6 @@ const GlobalStyles = () => (
 // CONTEXT & STATE
 // ============================================================
 const AppContext = createContext();
-
-// Device Detection Hook
-const useDevice = () => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-  
-  return isMobile;
-};
 
 const initialState = {
   cart: [],
@@ -542,7 +501,7 @@ const StarRating = ({ rating, size = 14 }) => (
 
 // --- PRODUCT CARD ---
 const ProductCard = ({ product, onView }) => {
-  const { state, dispatch, isMobile } = useContext(AppContext);
+  const { state, dispatch } = useContext(AppContext);
   const inWishlist = state.wishlist.find(i => i.id === product.id);
 
   const addToCart = (e) => {
@@ -1224,7 +1183,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
     </div>
 
     {!isMobile && (
-      <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both", display: isMobile ? "none" : "block" }}>
+      <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both", display: isMobile ? "block" : "block" }}>
   <div style={{ borderRadius: "var(--r-xl)", overflow: "hidden", aspectRatio: isMobile ? "16/9" : "3/4" }}>
     <img
       src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=700&q=85"
@@ -2666,10 +2625,9 @@ const NotFoundPage = ({ setPage }) => (
 // ============================================================
 
 export default function App() {
-  const isMobile = useDevice();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [page, setPage] = useState("home");
-  useEffect(() => { 
+  useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (user) => {
     if (user) {
       dispatch({ type: "SET_USER", user });
@@ -2715,8 +2673,8 @@ useEffect(() => {
   const showNav = page !== "login";
 
   return (
-    <AppContext.Provider value={{ state, dispatch, isMobile }}>
-    <GlobalStyles />
+    <AppContext.Provider value={{ state, dispatch }}>
+      <GlobalStyles />
       {showNav && <Navbar page={page} setPage={setPage} />}
       <CartSidebar />
       <Toast toast={state.toast} onClose={() => dispatch({ type: "CLEAR_TOAST" })} />
