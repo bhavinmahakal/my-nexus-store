@@ -2,6 +2,7 @@ import { useState, useEffect, createContext, useContext, useReducer } from "reac
 import { auth, db } from "./firebase";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { initiatePayment } from "./utils/razorpay";
+import emailjs from '@emailjs/browser';
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword,
@@ -443,7 +444,7 @@ function reducer(state, action) {
 // MOCK DATA
 // ============================================================
 const PRODUCTS = [
-  { id: 1, name: "Obsidian Pro Runner", category: "Footwear", price: 189, originalPrice: 249, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80", rating: 4.8, reviews: 342, badge: "Bestseller", variants: ["US 8", "US 9", "US 10", "US 11"], colors: ["#1a1a1a", "#ff4d1c", "#3b82f6"], description: "Engineered for performance. Built for the streets. The Obsidian Pro combines reactive foam cushioning with a breathable knit upper for all-day comfort." },
+{ id: 1, name: "Obsidian Pro Runner", category: "Footwear", price: 189, originalPrice: 249, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&q=80", rating: 4.8, reviews: 342, badge: "Bestseller", variants: ["US 8", "US 9", "US 10", "US 11"], colors: ["#1a1a1a", "#ff4d1c", "#3b82f6"], description: "Engineered for performance. Built for the streets. The Obsidian Pro combines reactive foam cushioning with a breathable knit upper for all-day comfort." },
   { id: 2, name: "Volt Urban Hoodie", category: "Apparel", price: 129, originalPrice: 169, image: "https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80", rating: 4.7, reviews: 218, badge: "New", variants: ["S", "M", "L", "XL", "XXL"], colors: ["#090909", "#2e2e2e", "#ff4d1c"], description: "Premium heavyweight fleece with a brushed interior. Oversized fit with dropped shoulders for that perfect streetwear silhouette." },
   { id: 3, name: "Cipher Tech Watch", category: "Accessories", price: 349, originalPrice: 499, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&q=80", rating: 4.9, reviews: 156, badge: "Limited", variants: ["42mm", "46mm"], colors: ["#1a1a1a", "#f5f5f0", "#f59e0b"], description: "Swiss-inspired movement meets digital precision. Sapphire crystal glass, titanium case, and 7-day battery life." },
   { id: 4, name: "Nova Cargo Pants", category: "Apparel", price: 149, originalPrice: 199, image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80", rating: 4.6, reviews: 89, badge: null, variants: ["28", "30", "32", "34", "36"], colors: ["#2e2e2e", "#3d3d3d", "#1a2535"], description: "Tactical-inspired 8-pocket design with water-resistant ripstop fabric. Built for urban explorers." },
@@ -451,7 +452,7 @@ const PRODUCTS = [
   { id: 6, name: "Arc Sunglasses", category: "Accessories", price: 219, originalPrice: 289, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&q=80", rating: 4.8, reviews: 127, badge: "New", variants: ["One Size"], colors: ["#1a1a1a", "#f59e0b", "#3b82f6"], description: "Polarized lenses with UV400 protection. Geometric acetate frames inspired by brutalist architecture." },
   { id: 7, name: "Stealth Backpack 30L", category: "Bags", price: 179, originalPrice: 229, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&q=80", rating: 4.7, reviews: 445, badge: "Bestseller", variants: ["One Size"], colors: ["#1a1a1a", "#2e2e2e"], description: "30L capacity with laptop compartment, hidden pockets, and RFID-blocking technology." },
   { id: 8, name: "Flux Tee Pack (3x)", category: "Apparel", price: 79, originalPrice: 99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80", rating: 4.4, reviews: 678, badge: "Value", variants: ["S", "M", "L", "XL"], colors: ["#090909", "#f5f5f0", "#ff4d1c"], description: "Triple-pack of our signature heavyweight cotton tees. 240gsm Pima cotton. Pre-shrunk. Built to last." },
-];
+];  
 
 const CATEGORIES = ["All", "Footwear", "Apparel", "Accessories", "Bags"];
 
@@ -600,7 +601,7 @@ const ProductCard = ({ product, onView }) => {
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-            <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--white)" }}>${product.price}</span>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--white)" }}>₹{product.price}</span>
             {product.originalPrice && <span style={{ fontSize: 13, color: "var(--text-dim)", textDecoration: "line-through" }}>${product.originalPrice}</span>}
           </div>
           <button className="btn-primary" onClick={addToCart} style={{ padding: "8px 16px", fontSize: 12 }}>
@@ -813,10 +814,10 @@ const CartSidebar = () => {
     return;
   }
   initiatePayment({
-    amount: total,
+    amount: Math.round(total * 83),
     userInfo: {
-      name: state.user.displayName || state.user.email,
-      email: state.user.email,
+      name: state.user.displayName || state.user.email || "ZROM Customer",
+      email: state.user.email || "",
     },
     onSuccess: async (response) => {
       await addDoc(collection(db, "orders"), {
@@ -827,6 +828,18 @@ const CartSidebar = () => {
         status: "confirmed",
         createdAt: serverTimestamp(),
       });
+      // Email send karo
+await emailjs.send(
+  "service_62f5ozm",
+  "template_ye4w4i6",
+  {
+    customer_name: state.user.displayName || "ZROM Customer",
+    customer_email: state.user.email,
+    amount: total,
+    payment_id: response.razorpay_payment_id,
+  },
+  "NGPdteDoJw0Xn3dK2"
+);
       dispatch({ type: "CLEAR_CART" });
       dispatch({ type: "CLOSE_CART" });
       dispatch({ type: "SET_TOAST", toast: { title: "Order Placed! 🎉", msg: "Payment successful!" } });
@@ -1654,7 +1667,7 @@ const ProductDetailPage = ({ product, onBack }) => {
               </div>
 
               <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 32 }}>
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 42, color: "var(--white)" }}>${product.price}</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 42, color: "var(--white)" }}>₹{product.price}</span>
                 {product.originalPrice && (
                   <span style={{ fontSize: 20, color: "var(--text-dim)", textDecoration: "line-through" }}>${product.originalPrice}</span>
                 )}
