@@ -2785,7 +2785,7 @@ const NotFoundPage = ({ setPage }) => (
 // ============================================================
 
 export default function App() {
-  const isMobile = useDevice();
+  const isMobile = window.innerWidth <= 768;
   const [state, dispatch] = useReducer(reducer, initialState);
   const [page, setPage] = useState("home");
   useEffect(() => { 
