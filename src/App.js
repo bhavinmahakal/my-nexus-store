@@ -376,6 +376,93 @@ const GlobalStyles = () => (
       .hero-float { display: none !important; }
     }
 
+    /* ── MOBILE FIXES ── */
+    @media (max-width: 768px) {
+  body, html {
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+  
+  .page {
+    width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  section {
+    width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
+
+@media (max-width: 768px) {
+
+  /* Hero — image hide karo, full width text */
+  .hero-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .hero-image-col {
+    display: none !important;
+  }
+
+  /* Products — 2 column grid */
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* Trust badges — 2 column */
+  .trust-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Stats — smaller font */
+  .hero-stats {
+    gap: 16px !important;
+  }
+
+  /* Container padding */
+  .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+
+  /* Cards — better touch targets */
+  .card {
+    border-radius: 16px !important;
+  }
+
+  /* Footer grid */
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+
+  /* Profile stats */
+  .profile-stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* Filter bar */
+  .filter-bar {
+    flex-direction: column !important;
+  }
+
+  /* Checkout button bigger */
+  .btn-primary {
+    padding: 16px 24px !important;
+    font-size: 15px !important;
+  }
+}
+
+/* ── EXTRA SMALL PHONES ── */
+@media (max-width: 380px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+}
+  
   `}</style>
 );
   
@@ -546,8 +633,10 @@ const StarRating = ({ rating, size = 14 }) => (
 
 // --- PRODUCT CARD ---
 const ProductCard = ({ product, onView }) => {
-  const { state, dispatch, isMobile } = useContext(AppContext);
-  const inWishlist = state.wishlist.find(i => i.id === product.id);
+const { state, dispatch } = useContext(AppContext);
+// eslint-disable-next-line no-unused-vars
+const isMobile = window.innerWidth <= 768;
+const inWishlist = state?.wishlist?.some(w => w.id === product?.id) || false;
 
   const addToCart = (e) => {
     e.stopPropagation();
@@ -1223,7 +1312,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
   <div style={{ position: "absolute", bottom: "10%", left: "5%", width: 300, height: 300, background: "radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%)", borderRadius: "50%", animation: "float 8s ease-in-out infinite reverse" }} />
   <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.03) 1px, transparent 0)", backgroundSize: "40px 40px" }} />
 
-  <div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 64, alignItems: "center", padding: isMobile ? "48px 16px" : "80px 24px" }}>
+<div className="container" style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 64, alignItems: "center", padding: isMobile ? "100px 20px 60px" : "80px 24px" }}>
     <div style={{ animation: "fadeUp 0.8s ease" }}>
       <div className="badge badge-neon" style={{ marginBottom: 24 }}>
         <Icon name="bolt" size={11} /> NEW DROP SS26
@@ -1254,7 +1343,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
     </div>
 
     {!isMobile && (
-      <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both", display: isMobile ? "block" : "block" }}>
+      <div style={{ position: "relative", animation: "fadeUp 0.8s ease 0.2s both", display: isMobile ? "none" : "block" }}>
   <div style={{ borderRadius: "var(--r-xl)", overflow: "hidden", aspectRatio: isMobile ? "16/9" : "3/4" }}>
     <img
       src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=700&q=85"
