@@ -431,6 +431,8 @@ function reducer(state, action) {
       return { ...state, isCartOpen: !state.isCartOpen };
     case "CLOSE_CART":
       return { ...state, isCartOpen: false };
+    case "CLEAR_CART":
+      return { ...state, cart: [] };
     case "SET_TOAST":
       return { ...state, toast: action.toast };
     case "CLEAR_TOAST":
@@ -464,7 +466,7 @@ const TESTIMONIALS = [
 
 const FAQS = [
   { q: "What is your return policy?", a: "We offer a 30-day hassle-free return policy. Items must be in original condition with tags attached. Simply initiate a return from your profile page and we'll send a prepaid label." },
-  { q: "How long does shipping take?", a: "Standard shipping takes 3-5 business days. Express shipping (1-2 days) is available at checkout. Free standard shipping on orders over ₹2,999 / $50." },
+  { q: "How long does shipping take?", a: "Standard shipping takes 3-5 business days. Express shipping (1-2 days) is available at checkout. Free standard shipping on orders over ₹2,999 / ₹999 ." },
   { q: "Do you ship internationally?", a: "Yes! We ship to 40+ countries. International orders typically arrive in 7-14 business days. Import duties may apply depending on your country." },
   { q: "How do I track my order?", a: "You'll receive a tracking link via email once your order ships. You can also track in real-time from your profile under 'Order History'." },
   { q: "Are your products authentic?", a: "100% authentic. We manufacture all products in-house with ethically sourced materials. Every product comes with an authenticity certificate." },
@@ -602,7 +604,7 @@ const ProductCard = ({ product, onView }) => {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
             <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 20, color: "var(--white)" }}>₹{product.price}</span>
-            {product.originalPrice && <span style={{ fontSize: 13, color: "var(--text-dim)", textDecoration: "line-through" }}>${product.originalPrice}</span>}
+            {product.originalPrice && <span style={{ fontSize: 13, color: "var(--text-dim)", textDecoration: "line-through" }}>₹{product.originalPrice}</span>}
           </div>
           <button className="btn-primary" onClick={addToCart} style={{ padding: "8px 16px", fontSize: 12 }}>
             <Icon name="plus" size={13} /> Add
@@ -674,7 +676,7 @@ const CartSidebar = () => {
             {freeShippingLeft > 0 ? (
               <>
                 <div style={{ fontSize: 12, color: "var(--text-mid)", marginBottom: 8 }}>
-                  Add <span style={{ color: "var(--neon)", fontWeight: 700 }}>${freeShippingLeft.toFixed(2)}</span> more for free shipping! 🚚
+                  Add <span style={{ color: "var(--neon)", fontWeight: 700 }}>₹{freeShippingLeft.toFixed(2)}</span> more for free shipping! 🚚
                 </div>
                 <div style={{ height: 4, background: "var(--border)", borderRadius: 4, overflow: "hidden" }}>
                   <div style={{ height: "100%", width: `${Math.min((subtotal / 50) * 100, 100)}%`, background: "var(--neon)", borderRadius: 4, transition: "width 0.4s ease" }} />
@@ -741,7 +743,7 @@ const CartSidebar = () => {
                     {/* Price + Remove */}
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 16, color: "var(--white)" }}>
-                        ${(item.price * item.qty).toFixed(2)}
+                        ₹{(item.price * item.qty).toFixed(2)}
                       </span>
                       <button
                         onClick={() => dispatch({ type: "REMOVE_FROM_CART", id: item.id, variant: item.variant })}
@@ -782,24 +784,24 @@ const CartSidebar = () => {
             <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 16 }}>
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--text-mid)" }}>
                 <span>Subtotal</span>
-                <span>${subtotal.toFixed(2)}</span>
+                <span>₹{subtotal.toFixed(2)}</span>
               </div>
               {discount > 0 && (
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--neon)" }}>
                   <span>Discount ({discount}%)</span>
-                  <span>-${discountAmt.toFixed(2)}</span>
+                  <span>-₹{discountAmt.toFixed(2)}</span>
                 </div>
               )}
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--text-mid)" }}>
                 <span>Shipping</span>
                 <span style={{ color: shipping === 0 ? "var(--neon)" : "var(--text-mid)" }}>
-                  {shipping === 0 ? "FREE 🎉" : `$${shipping.toFixed(2)}`}
+                  {shipping === 0 ? "FREE 🎉" : `${shipping.toFixed(2)}`}
                 </span>
               </div>
               <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
               <div style={{ display: "flex", justifyContent: "space-between" }}>
                 <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16 }}>Total</span>
-                <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>${total.toFixed(2)}</span>
+                <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>₹{total.toFixed(2)}</span>
               </div>
             </div>
 
@@ -814,7 +816,7 @@ const CartSidebar = () => {
     return;
   }
   initiatePayment({
-    amount: Math.round(total * 83),
+    amount: total,
     userInfo: {
       name: state.user.displayName || state.user.email || "ZROM Customer",
       email: state.user.email || "",
@@ -1156,7 +1158,7 @@ const Footer = ({ setPage }) => (
         borderBottom: "1px solid var(--border)", marginBottom: 32,
       }}>
         {[
-          ["🚚", "Free Shipping over $50"],
+          ["🚚", "Free Shipping over ₹999 "],
           ["🔒", "Secure Checkout"],
           ["↩️", "30-Day Returns"],
           ["✅", "100% Authentic"],
@@ -1267,7 +1269,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
         </div>
         <div className="hero-float" style={{ position: "absolute", top: 24, right: 16, background: "var(--card)", border: "1px solid var(--border)", borderRadius: "var(--r-md)", padding: "14px 18px", animation: "float 7s ease-in-out infinite reverse" }}>
           <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Free Shipping</div>
-          <div style={{ fontWeight: 700, color: "var(--neon)", fontSize: 14 }}>Orders over $50</div>
+          <div style={{ fontWeight: 700, color: "var(--neon)", fontSize: 14 }}>Orders over ₹999 </div>
         </div>
       </div>
     )}
@@ -1279,7 +1281,7 @@ const HomePage = ({ setPage, onViewProduct }) => {
         <div className="container">
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(4, 1fr)", gap: 24 }}>
             {[
-              { icon: "truck", title: "Free Shipping", sub: "On orders over $50" },
+              { icon: "truck", title: "Free Shipping", sub: "On orders over ₹999 " },
               { icon: "shield", title: "Secure Checkout", sub: "256-bit SSL encryption" },
               { icon: "refresh", title: "30-Day Returns", sub: "Hassle-free policy" },
               { icon: "star", title: "4.9/5 Rating", sub: "10,000+ reviews" },
@@ -1510,7 +1512,7 @@ const ProductsPage = ({ onViewProduct }) => {
                   onChange={e => setPriceRange(Number(e.target.value))}
                   style={{ width: 100, accentColor: "var(--accent)" }}
                 />
-                <span style={{ color: "var(--white)", fontWeight: 700, minWidth: 40 }}>${priceRange}</span>
+                <span style={{ color: "var(--white)", fontWeight: 700, minWidth: 40 }}>₹{priceRange}</span>
               </div>
 
               {/* View toggle */}
@@ -1592,10 +1594,10 @@ const ProductsPage = ({ onViewProduct }) => {
                     </div>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12 }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                        <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>${p.price}</span>
+                        <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 22, color: "var(--white)" }}>₹{p.price}</span>
                         {p.originalPrice && (
                           <>
-                            <span style={{ fontSize: 14, color: "var(--text-dim)", textDecoration: "line-through" }}>${p.originalPrice}</span>
+                            <span style={{ fontSize: 14, color: "var(--text-dim)", textDecoration: "line-through" }}>₹{p.originalPrice}</span>
                             <span style={{ fontSize: 12, fontWeight: 700, color: "var(--neon)" }}>
                               -{Math.round((1 - p.price / p.originalPrice) * 100)}% OFF
                             </span>
@@ -1669,7 +1671,7 @@ const ProductDetailPage = ({ product, onBack }) => {
               <div style={{ display: "flex", alignItems: "baseline", gap: 16, marginBottom: 32 }}>
                 <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 42, color: "var(--white)" }}>₹{product.price}</span>
                 {product.originalPrice && (
-                  <span style={{ fontSize: 20, color: "var(--text-dim)", textDecoration: "line-through" }}>${product.originalPrice}</span>
+                  <span style={{ fontSize: 20, color: "var(--text-dim)", textDecoration: "line-through" }}>₹{product.originalPrice}</span>
                 )}
                 {discount && <span className="badge badge-accent">Save {discount}%</span>}
               </div>
@@ -2345,7 +2347,7 @@ const ProfilePage = ({ setPage }) => {
               { label: "Orders", val: "3", icon: "📦", color: "var(--accent)" },
               { label: "Wishlist", val: state.wishlist?.length || 0, icon: "❤️", color: "#ff6b9d" },
               { label: "Points", val: "820", icon: "⭐", color: "var(--gold)" },
-              { label: "Saved", val: "$68", icon: "💰", color: "var(--neon)" },
+              { label: "Saved", val: "₹68", icon: "💰", color: "var(--neon)" },
             ].map(s => (
               <div key={s.label} style={{
                 padding: "20px", background: "var(--surface)",
@@ -2406,7 +2408,7 @@ const ProfilePage = ({ setPage }) => {
                     color: statusColor[o.status], background: statusBg[o.status],
                     border: `1px solid ${statusColor[o.status]}33`,
                   }}>{o.status}</span>
-                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--white)" }}>${o.total}</span>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 18, color: "var(--white)" }}>₹{o.total}</span>
                   <button style={{
                     padding: "7px 16px", borderRadius: 8, background: "var(--card)",
                     border: "1px solid var(--border)", color: "var(--text-mid)",
@@ -2657,7 +2659,7 @@ const AdminPage = ({ setPage }) => {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 20 }}>
             {[
               { label: "Total Orders", val: "3", icon: "📦", color: "var(--accent)" },
-              { label: "Revenue", val: "$616", icon: "💰", color: "var(--neon)" },
+              { label: "Revenue", val: "₹616", icon: "💰", color: "var(--neon)" },
               { label: "Users", val: "1", icon: "👤", color: "var(--blue)" },
               { label: "Products", val: "8", icon: "🛍️", color: "var(--gold)" },
             ].map(s => (
