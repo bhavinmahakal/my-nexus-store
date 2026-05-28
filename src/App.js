@@ -374,6 +374,11 @@ const GlobalStyles = () => (
       .desktop-nav { display: none !important; }
       .mobile-menu-btn { display: flex !important; }
       .hero-float { display: none !important; }
+      .hero-image-col { display: none !important; 
+      * {
+         max-width: 100vw !important;
+         overflow-x: hidden !important;
+}
     }
 
     /* ── MOBILE FIXES ── */
