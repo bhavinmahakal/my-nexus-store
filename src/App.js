@@ -374,11 +374,6 @@ const GlobalStyles = () => (
       .desktop-nav { display: none !important; }
       .mobile-menu-btn { display: flex !important; }
       .hero-float { display: none !important; }
-      .hero-image-col { display: none !important; 
-      * {
-         max-width: 100vw !important;
-         overflow-x: hidden !important;
-}
     }
 
     /* ── MOBILE FIXES ── */
@@ -465,6 +460,24 @@ const GlobalStyles = () => (
   .grid-4 {
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 8px !important;
+  }
+}
+  @media (max-width: 768px) {
+  /* Trust badges - 2 column */
+  .trust-badges-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  
+  /* Footer grid - single column */
+  .footer-main-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  /* All sections no overflow */
+  html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
   }
 }
   
