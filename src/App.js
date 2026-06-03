@@ -481,6 +481,16 @@ const GlobalStyles = () => (
   }
 }
   
+/* Cards cutoff fix */
+  * {
+    box-sizing: border-box !important;
+  }
+  
+  .container {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    overflow-x: hidden !important;
+  }
   `}</style>
 );
   
