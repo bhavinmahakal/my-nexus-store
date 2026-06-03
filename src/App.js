@@ -491,7 +491,9 @@ const GlobalStyles = () => (
 const AppContext = createContext();
 
 // Device Detection Hook
+// eslint-disable-next-line no-unused-vars
 const useDevice = () => {
+
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   
   useEffect(() => {
@@ -1145,9 +1147,12 @@ const Navbar = ({ page, setPage }) => {
 };
 
 // --- FOOTER ---
-const Footer = ({ setPage }) => (
+const Footer = ({ setPage }) => {
+  const isMobile = useContext(AppContext);
+  return (
   <footer style={{ background: "var(--void)", borderTop: "1px solid var(--border)", padding: "80px 0 32px" }}>
     <div className="container">
+
 
       {/* ── TOP CTA BANNER ── */}
       <div style={{
@@ -1186,7 +1191,7 @@ const Footer = ({ setPage }) => (
       </div>
 
       {/* ── MAIN GRID ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 56 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 1fr 1fr", gap: 48, marginBottom: 56 }}>
 
         {/* Brand column */}
         <div>
@@ -1300,7 +1305,8 @@ const Footer = ({ setPage }) => (
 
     </div>
   </footer>
-);
+  );
+};
 
 // ============================================================
 // PAGES
